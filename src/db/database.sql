@@ -11,6 +11,9 @@ CREATE DOMAIN SIZE_UNIT AS VARCHAR(3)
 
 CREATE DOMAIN MIN_ORDER_UNIT AS VARCHAR(5)
   CHECK(value ~ '^pcs$|^cm$|^box$|^roll$');
+
+CREATE DOMAIN SPECIAL_GROUP AS CHAR(3)
+  CHECK(value ~ '^new$|^prm$|^liq$');
   
 CREATE TABLE user_tbl (
   id ID PRIMARY KEY,
@@ -70,6 +73,7 @@ CREATE TABLE item_info_tbl (
   min_order_unit MIN_ORDER_UNIT NOT NULL,
   description_am TEXT,
   description_ru TEXT,
+  special_group SPECIAL_GROUP,
 
   CONSTRAINT fk_item
     FOREIGN KEY(item_id)
