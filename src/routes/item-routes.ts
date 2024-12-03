@@ -1,0 +1,58 @@
+import express from "express";
+
+import { get_similar_sorting, get_suggestion_sorting, get_user_sorting } from "../middleware/sorting";
+import { add_item, delete_item, edit_item, get_all_items_admin, get_all_items_public, get_item_admin, get_item_public } from "../controllers/item-controllers";
+import { verify_jwt } from "../middleware/verify-jwt";
+import { check_item_body, check_lang } from "../middleware/checks";
+import { convert_photos_to_webp } from "../middleware/convert-photos";
+
+const item_router = express.Router();
+
+item_router.get(
+  "/public/all",
+  check_lang,
+  get_user_sorting,
+  get_all_items_public
+);
+
+item_router.get(
+  "/item/public/:id",
+  check_lang,
+  get_item_public
+);
+
+item_router.get(
+  "/public/suggestions",
+  check_lang,
+  get_suggestion_sorting,
+  get_all_items_public
+);
+
+item_router.get(
+  "/public/similar",
+  check_lang,
+  get_similar_sorting,
+  get_all_items_public
+);
+
+item_router.get(
+  "/admin/all",
+  verify_jwt,
+  get_user_sorting,
+  get_all_items_admin
+);
+
+item_router.post(
+  "/item/admin/add",
+  verify_jwt,
+  check_item_body,
+  convert_photos_to_webp,
+  add_item
+);
+
+item_router.route("/item/admin/:id")
+  .get(verify_jwt, get_item_admin)
+  .put(verify_jwt, check_item_body, convert_photos_to_webp, edit_item)
+  .delete(verify_jwt, delete_item);
+
+export default item_router;
