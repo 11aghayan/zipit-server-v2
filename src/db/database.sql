@@ -74,6 +74,7 @@ CREATE TABLE item_info_tbl (
   description_am TEXT,
   description_ru TEXT,
   special_group SPECIAL_GROUP,
+  creation_date BIGINT DEFAULT trunc(extract(epoch from now() )*1000) NOT NULL,
 
   CONSTRAINT fk_item
     FOREIGN KEY(item_id)
