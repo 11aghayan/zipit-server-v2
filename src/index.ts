@@ -6,6 +6,7 @@ import { error_logger } from "./util/error_logger";
 import { cors, credentials } from "./middleware/cors";
 import item_router from "./routes/item-routes";
 import photo_router from "./routes/photo-routes";
+import category_router from "./routes/category-routes";
 
 const app = express();
 const BASE_URL = '/api/v2';
@@ -19,6 +20,7 @@ app.use(cors);
 // Routes
 app.use(`${BASE_URL}/items`, item_router);
 app.use(`${BASE_URL}/photo`, photo_router);
+app.use(`${BASE_URL}/categories`, category_router);
 
 function start_server() {
   const PORT = process.env.PORT || 3200;
