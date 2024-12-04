@@ -69,13 +69,42 @@ export type T_Filters = {
 };
 
 export type T_Item_Public_Short = {
-  id: string;
+  id: T_ID;
   name_ru: string;
-  photo_id: string;
+  photo_id: T_ID;
   price: number;
   promo: number | null;
   special_group: T_Special_Group | null;
   size_value: number;
   size_unit: T_Size_Unit;
   color_ru: string;
+};
+
+export type T_Item_Public_Common = {
+  id: T_ID;
+  category_id: T_ID;
+  category: string;
+  name: string;
+};
+
+export type T_Item_Public_Variant = {
+  photo_id: T_ID;
+  price: number;
+  promo: number | null;
+  size_id: T_ID;
+  size_value: number;
+  size_unit: T_Size_Unit;
+  color_id: T_ID;
+  color: string;
+  min_order_value: number;
+  min_order_unit: T_Min_Order_Unit;
+  description: string;
+  special_group: T_Special_Group | null;
+  available: number;
+};
+
+export type T_Item_Public_Full = T_Item_Public_Common & T_Item_Public_Variant;
+
+export type T_Item_Public_Full_Response = T_Item_Public_Common & {
+  variants: T_Item_Public_Variant[];
 };

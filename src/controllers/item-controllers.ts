@@ -1,5 +1,5 @@
-import * as db from "../db/db";
-import { T_Controller, T_Filters, T_Lang } from "../types";
+import * as Db from "../db/db";
+import { T_Controller, T_Filters, T_Item_Public_Common, T_Item_Public_Full, T_Item_Public_Full_Response, T_Lang } from "../types";
 import { custom_error, server_error } from "../util/error_handlers";
 
 export const get_all_items_public: T_Controller = async function(req, res) {
@@ -7,9 +7,9 @@ export const get_all_items_public: T_Controller = async function(req, res) {
   const lang = req.query.lang as T_Lang;
 
   try {
-    const items = await db.get_all_items_public(filters, sorting, lang);
-    if (items instanceof db.DB_Error_Response) {
-      return custom_error(res, 500, "Items fetching error. Try Again");
+    const items = await Db.get_all_items_public(filters, sorting, lang);
+    if (items instanceof Db.Db_Error_Response) {
+      return custom_error(res, 500, "Items fetching error");
     }
     return res.status(200).json({ items: items.rows, items_count: items.rows.length });
   } catch (error) {
@@ -17,8 +17,36 @@ export const get_all_items_public: T_Controller = async function(req, res) {
   }
 }
 
-export async function get_item_public() {
-  
+export const get_item_public: T_Controller = async function(req, res) {
+  const { id } = req.params;
+  const lang = req.query.lang as T_Lang;
+  try {
+    const item = await Db.get_item_public(id, lang);
+    if (item instanceof Db.Db_Error_Response) {
+      return custom_error(res, 500, "Item fetching error");
+    }
+
+    const response = item.rows.reduce((prev: T_Item_Public_Full_Response, current: T_Item_Public_Full) => {
+      const obj = {} as T_Item_Public_Common;
+      const common_keys = ["id", "category_id", "category", "name"] as (keyof T_Item_Public_Common)[];
+      const variant = JSON.parse(JSON.stringify(current));
+      common_keys.forEach((key: keyof T_Item_Public_Common) => {
+        obj[key] = current[key];
+        delete variant[key];
+      });
+      return {
+        ...obj,
+        variants: [
+          ...prev.variants,
+          variant
+        ]
+      };
+    }, { id: '', category_id: '', category: '', name: '', variants: [] } as T_Item_Public_Full_Response) as T_Item_Public_Full_Response;
+    
+    return res.status(200).json({ item: response, variants: response.variants.length });
+  } catch (error) {
+    return server_error(res, "get_item_public", error);
+  }
 }
 
 export async function get_all_items_admin() {
