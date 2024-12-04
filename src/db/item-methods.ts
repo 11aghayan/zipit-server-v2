@@ -1,5 +1,5 @@
 import { db, Db_Error_Response, Db_Success_Response } from "./db";
-import { T_Filters, T_Item_Public_Full, T_Item_Public_Short, T_Lang, T_ID, T_Special_Group, T_Size_Unit } from "../types";
+import { T_Filters, T_Item_Public_Full, T_Item_Public_Short, T_Lang, T_ID, T_Special_Group, T_Size_Unit, T_Item_Admin_Short } from "../types";
 import { error_logger } from "../util/error_handlers";
 
 export async function get_all_items_public({ categories, special_groups, count }: T_Filters, sorting: string, lang: T_Lang) {
@@ -174,6 +174,38 @@ export async function get_similar_items(category_id: T_ID, special_group: T_Spec
   }
 }
 
+export async function get_all_items_admin({ categories, special_groups, count }: T_Filters, sorting: string) {
+  try {
+    const { rows } = await db.query(
+      `
+        SELECT
+          item_tbl.id,
+          name_am as name
+        FROM item_tbl
+        INNER JOIN item_info_tbl
+        ON item_tbl.id = item_info_tbl.item_id
+        INNER JOIN item_size_tbl
+        ON item_info_tbl.size_id = item_size_tbl.id
+        INNER JOIN item_color_tbl
+        ON item_info_tbl.color_id = item_color_tbl.id
+        WHERE
+        ($1::uuid[] IS NULL AND $2::char(3)[] IS NULL)
+        OR 
+        (category_id = ANY($1::uuid[]) OR special_group = ANY($2::char(3)[]))
+        ORDER BY ${sorting}
+        LIMIT $3;
+      `,
+      [categories, special_groups, count]
+    );
+
+    return new Db_Success_Response<T_Item_Admin_Short>(remove_duplicates(rows));
+  } catch (error) {
+    error_logger("db -> item-methods -> get_all_items_admin", error);
+    return new Db_Error_Response(error);
+  }
+}
+
+// Util methods
 function short_items_keys(lang: T_Lang) {
   return `
     item_tbl.id, 

@@ -3,7 +3,9 @@ import { Pool } from "pg";
 import { 
   get_all_items_public, 
   get_item_public,
-  get_similar_items } from './item-methods';
+  get_similar_items,
+  get_all_items_admin
+} from './item-methods';
 
 const {
   PG_USER: user,
@@ -44,5 +46,6 @@ export class Db_Error_Response {
 export {
   get_all_items_public,
   get_item_public,
-  get_similar_items
+  get_similar_items,
+  get_all_items_admin
 };

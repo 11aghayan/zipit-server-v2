@@ -108,3 +108,8 @@ export type T_Item_Public_Full = T_Item_Public_Common & T_Item_Public_Variant;
 export type T_Item_Public_Full_Response = T_Item_Public_Common & {
   variants: T_Item_Public_Variant[];
 };
+
+export type T_Item_Admin_Short = {
+  id: T_ID;
+  name: string;
+}

@@ -67,15 +67,25 @@ export const get_similar_items: T_Controller = async function(req, res) {
   }
 }
 
-export async function get_all_items_admin() {
+export const get_all_items_admin: T_Controller = async function(req, res) {
+  const { filters, sorting } = req.body as { filters: T_Filters; sorting: string };
 
+  try {
+    const items = await Db.get_all_items_admin(filters, sorting);
+    if (items instanceof Db.Db_Error_Response) {
+      return custom_error(res, 500, "Items fetching error");
+    }
+    return res.status(200).json({ length: items.rows.length, items: items.rows });
+  } catch (error) {
+    return server_error(res, "get_similar_items", error);
+  }
 }
 
 export async function get_item_admin() {
 
 } 
 
-export const add_item = async function() {
+export const add_item: T_Controller = async function() {
   
   try {
     

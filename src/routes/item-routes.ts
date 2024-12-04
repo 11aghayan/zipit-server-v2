@@ -37,8 +37,8 @@ item_router.get(
 
 item_router.get(
   "/admin/all",
-  filter_items,
   verify_jwt,
+  filter_items,
   get_user_sorting,
   get_all_items_admin
 );
