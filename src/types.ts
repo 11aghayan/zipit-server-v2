@@ -112,4 +112,21 @@ export type T_Item_Public_Full_Response = T_Item_Public_Common & {
 export type T_Item_Admin_Short = {
   id: T_ID;
   name: string;
-}
+};
+
+export type T_Item_Admin_Common = {
+  id: T_ID;
+  category_id: T_ID;
+  name_am: string;
+  name_ru: string;
+  category_label_am: string;
+  category_label_ru: string;
+};
+
+export type T_Item_Admin_Variant = T_Item_Info & T_Size & T_Color & T_Photo;
+
+export type T_Item_Admin_Full = T_Item_Admin_Common & T_Item_Admin_Variant;
+
+export type T_Item_Admin_Full_Response = T_Item_Admin_Common & {
+  variants: T_Item_Admin_Variant[];
+};

@@ -1,5 +1,5 @@
 import * as Db from "../db/db";
-import { T_Controller, T_Filters, T_ID, T_Item_Public_Common, T_Item_Public_Full, T_Item_Public_Full_Response, T_Item_Public_Short, T_Lang, T_Size_Unit, T_Special_Group } from "../types";
+import { T_Controller, T_Filters, T_ID, T_Item_Admin_Common, T_Item_Admin_Full, T_Item_Admin_Full_Response, T_Item_Public_Common, T_Item_Public_Full, T_Item_Public_Full_Response, T_Item_Public_Short, T_Lang, T_Size_Unit, T_Special_Group } from "../types";
 import { custom_error, server_error } from "../util/error_handlers";
 
 export const get_all_items_public: T_Controller = async function(req, res) {
@@ -81,8 +81,36 @@ export const get_all_items_admin: T_Controller = async function(req, res) {
   }
 }
 
-export async function get_item_admin() {
+export const get_item_admin: T_Controller = async function(req, res) {
+  const { id } = req.params;
+  
+  try {
+    const item = await Db.get_item_admin(id);
+    if (item instanceof Db.Db_Error_Response) {
+      return custom_error(res, 500, "Item fetching error");
+    }    
 
+    const response = item.rows.reduce((prev: T_Item_Admin_Full_Response, current: T_Item_Admin_Full) => {
+      const obj = {} as T_Item_Admin_Common;
+      const common_keys = ["id", "category_id", "label_am", "label_ru", "name_am", "name_ru"] as (keyof T_Item_Admin_Common)[];
+      const variant = JSON.parse(JSON.stringify(current));
+      common_keys.forEach((key: keyof T_Item_Admin_Common) => {
+        obj[key] = current[key];
+        delete variant[key];
+      });
+      return {
+        ...obj,
+        variants: [
+          ...prev.variants,
+          variant
+        ]
+      };
+    }, { id: '', category_id: '', category_label_am: '', category_label_ru: '', name_ru: '', name_am: '', variants: [] } as T_Item_Admin_Full_Response) as T_Item_Admin_Full_Response;
+    
+    return res.status(200).json({ item: response })
+  } catch (error) {
+    return server_error(res, "get_similar_items", error);
+  }
 } 
 
 export const add_item: T_Controller = async function() {

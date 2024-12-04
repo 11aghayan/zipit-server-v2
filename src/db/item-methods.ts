@@ -1,6 +1,7 @@
 import { db, Db_Error_Response, Db_Success_Response } from "./db";
-import { T_Filters, T_Item_Public_Full, T_Item_Public_Short, T_Lang, T_ID, T_Special_Group, T_Size_Unit, T_Item_Admin_Short } from "../types";
+import { T_Filters, T_Item_Public_Full, T_Item_Public_Short, T_Lang, T_ID, T_Special_Group, T_Size_Unit, T_Item_Admin_Short, T_Item_Admin_Full } from "../types";
 import { error_logger } from "../util/error_handlers";
+import { remove_duplicates, short_items_keys } from "../util/db-utils";
 
 export async function get_all_items_public({ categories, special_groups, count }: T_Filters, sorting: string, lang: T_Lang) {
   try {
@@ -205,28 +206,31 @@ export async function get_all_items_admin({ categories, special_groups, count }:
   }
 }
 
-// Util methods
-function short_items_keys(lang: T_Lang) {
-  return `
-    item_tbl.id, 
-    name_${lang} as name,
-    photo_id,
-    price,
-    promo,
-    special_group,
-    size_value,
-    size_unit,
-    color_${lang} as color
-  `
+export async function get_item_admin(id: T_ID) {
+  try {
+    const { rows } = await db.query(
+      `
+        SELECT *
+        FROM item_tbl
+        INNER JOIN item_info_tbl
+        ON item_tbl.id = item_info_tbl.item_id
+        INNER JOIN item_size_tbl
+        ON item_info_tbl.size_id = item_size_tbl.id
+        INNER JOIN item_color_tbl
+        ON item_info_tbl.color_id = item_color_tbl.id 
+        INNER JOIN category_tbl
+        ON item_tbl.category_id = category_tbl.id
+        INNER JOIN item_photo_tbl
+        ON item_info_tbl.photo_id = item_photo_tbl.id
+        WHERE item_tbl.id = $1;
+      `,
+      [id]
+    );
+
+    return new Db_Success_Response<T_Item_Admin_Full>(rows);
+  } catch (error) {
+    error_logger("db -> item-methods -> get_item_admin", error);
+    return new Db_Error_Response(error);
+  }
 }
 
-function remove_duplicates<T extends { id: T_ID }>(arr: T[]) {
-  return arr.reduce((prev: T[], current: T) => {
-    const id_exists = prev.find(obj => obj.id === current.id);
-    if (id_exists) return prev;
-    return [
-      ...prev,
-      current
-    ];
-  }, [] as T[]);
-}
