@@ -119,8 +119,6 @@ export type T_Item_Admin_Common = {
   category_id: T_ID;
   name_am: string;
   name_ru: string;
-  category_label_am: string;
-  category_label_ru: string;
 };
 
 export type T_Item_Admin_Variant = T_Item_Info & T_Size & T_Color & T_Photo;
@@ -129,4 +127,25 @@ export type T_Item_Admin_Full = T_Item_Admin_Common & T_Item_Admin_Variant;
 
 export type T_Item_Admin_Full_Response = T_Item_Admin_Common & {
   variants: T_Item_Admin_Variant[];
+};
+
+export type T_Item_Body = {
+  category_id: T_ID;
+  name_am: string;
+  name_ru: string;
+  variants: {
+    price: number;
+    promo: number | null;
+    min_order_value: number
+    min_order_unit: T_Min_Order_Unit;
+    description_am: string | null;
+    description_ru: string | null;
+    special_group: T_Special_Group | null;
+    available: number;
+    size_value: number;
+    size_unit: T_Size_Unit;
+    color_am: string;
+    color_ru: string;
+    photo_src: string;
+  }[];
 };

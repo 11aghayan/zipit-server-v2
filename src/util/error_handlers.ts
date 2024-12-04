@@ -1,7 +1,7 @@
 import { Response } from "express";
 
 export function error_logger(function_name: string, err: any) {
-  const time = new Date(Date.now()).getUTCDate();
+  const time = new Date(Date.now()).toUTCString();
   console.error(`${time}: Error in ${function_name}`, err);
 }
 

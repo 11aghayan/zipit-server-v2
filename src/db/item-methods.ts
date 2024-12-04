@@ -1,5 +1,5 @@
 import { db, Db_Error_Response, Db_Success_Response } from "./db";
-import { T_Filters, T_Item_Public_Full, T_Item_Public_Short, T_Lang, T_ID, T_Special_Group, T_Size_Unit, T_Item_Admin_Short, T_Item_Admin_Full } from "../types";
+import { T_Filters, T_Item_Public_Full, T_Item_Public_Short, T_Lang, T_ID, T_Special_Group, T_Size_Unit, T_Item_Admin_Short, T_Item_Admin_Full, T_Item_Body } from "../types";
 import { error_logger } from "../util/error_handlers";
 import { remove_duplicates, short_items_keys } from "../util/db-utils";
 
@@ -27,7 +27,7 @@ export async function get_all_items_public({ categories, special_groups, count }
     
     return new Db_Success_Response<T_Item_Public_Short>(rows);
   } catch (error) {
-    error_logger("db -> item-methods -> get_all_items_public", error);
+    error_logger("db -> item-methods -> get_all_items_public\n", error);
     return new Db_Error_Response(error);
   }
 } 
@@ -70,7 +70,7 @@ export async function get_item_public(id: string, lang: T_Lang) {
 
     return new Db_Success_Response<T_Item_Public_Full>(rows);
   } catch (error) {
-    error_logger("db -> item-methods -> get_item_public", error);
+    error_logger("db -> item-methods -> get_item_public\n", error);
     return new Db_Error_Response(error);
   }
 }
@@ -170,7 +170,7 @@ export async function get_similar_items(category_id: T_ID, special_group: T_Spec
     rows = remove_duplicates(rows);
     return new Db_Success_Response(rows);
   } catch (error) {
-    error_logger("db -> item-methods -> get_similar_items", error);
+    error_logger("db -> item-methods -> get_similar_items\n", error);
     return new Db_Error_Response(error);
   }
 }
@@ -201,7 +201,7 @@ export async function get_all_items_admin({ categories, special_groups, count }:
 
     return new Db_Success_Response<T_Item_Admin_Short>(remove_duplicates(rows));
   } catch (error) {
-    error_logger("db -> item-methods -> get_all_items_admin", error);
+    error_logger("db -> item-methods -> get_all_items_admin\n", error);
     return new Db_Error_Response(error);
   }
 }
@@ -217,9 +217,7 @@ export async function get_item_admin(id: T_ID) {
         INNER JOIN item_size_tbl
         ON item_info_tbl.size_id = item_size_tbl.id
         INNER JOIN item_color_tbl
-        ON item_info_tbl.color_id = item_color_tbl.id 
-        INNER JOIN category_tbl
-        ON item_tbl.category_id = category_tbl.id
+        ON item_info_tbl.color_id = item_color_tbl.id
         INNER JOIN item_photo_tbl
         ON item_info_tbl.photo_id = item_photo_tbl.id
         WHERE item_tbl.id = $1;
@@ -229,7 +227,100 @@ export async function get_item_admin(id: T_ID) {
 
     return new Db_Success_Response<T_Item_Admin_Full>(rows);
   } catch (error) {
-    error_logger("db -> item-methods -> get_item_admin", error);
+    error_logger("db -> item-methods -> get_item_admin\n", error);
+    return new Db_Error_Response(error);
+  }
+}
+
+export async function add_item({ category_id, name_am, name_ru, variants }: T_Item_Body) {
+  try {
+    await db.query('BEGIN;');
+    const item_id = (await db.query(
+      `
+        INSERT INTO 
+        item_tbl(category_id, name_am, name_ru)
+        VALUES($1, $2, $3)
+        RETURNING id;
+      `,
+      [category_id, name_am, name_ru]
+    )).rows[0].id as T_ID;
+
+    const queries = variants.map((variant) => {
+      return (async function() {
+        const photo_id = (await db.query(
+          `
+            INSERT INTO 
+            item_photo_tbl(item_id, src)
+            VALUES($1, $2)
+            RETURNING id;
+          `,
+          [item_id, variant.photo_src]
+        )).rows[0].id as T_ID;
+  
+        const size_id = (await db.query(
+          `
+            INSERT INTO 
+            item_size_tbl(size_value, size_unit)
+            VALUES($1, $2)
+            RETURNING id;
+          `,
+          [variant.size_value, variant.size_unit]
+        )).rows[0].id as T_ID;
+  
+        const color_id = (await db.query(
+          `
+            INSERT INTO 
+            item_color_tbl(color_am, color_ru)
+            VALUES($1, $2)
+            RETURNING id;
+          `,
+          [variant.color_am, variant.color_ru]
+        )).rows[0].id as T_ID;
+  
+        await db.query(
+          `
+            INSERT INTO item_info_tbl
+            (
+              price,
+              promo,
+              min_order_value,
+              min_order_unit,
+              description_am,
+              description_ru,
+              special_group,
+              available,
+              item_id,
+              size_id,
+              color_id,
+              photo_id
+            )
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
+          `,
+          [
+            variant.price, 
+            variant.promo, 
+            variant.min_order_value, 
+            variant.min_order_unit, 
+            variant.description_am, 
+            variant.description_ru,
+            variant.special_group,
+            variant.available,
+            item_id,
+            size_id,
+            color_id,
+            photo_id
+          ]
+        );
+      })()
+      
+    });
+    
+    await Promise.all(queries);
+    
+    await db.query("COMMIT;");
+  } catch (error) {
+    await db.query("ROLLBACK;");
+    error_logger("db -> item-methods -> add_item\n", error);
     return new Db_Error_Response(error);
   }
 }

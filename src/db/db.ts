@@ -5,7 +5,8 @@ import {
   get_item_public,
   get_similar_items,
   get_all_items_admin,
-  get_item_admin
+  get_item_admin,
+  add_item
 } from './item-methods';
 
 const {
@@ -49,5 +50,6 @@ export {
   get_item_public,
   get_similar_items,
   get_all_items_admin,
-  get_item_admin
+  get_item_admin,
+  add_item
 };

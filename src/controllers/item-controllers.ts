@@ -1,5 +1,5 @@
 import * as Db from "../db/db";
-import { T_Controller, T_Filters, T_ID, T_Item_Admin_Common, T_Item_Admin_Full, T_Item_Admin_Full_Response, T_Item_Public_Common, T_Item_Public_Full, T_Item_Public_Full_Response, T_Item_Public_Short, T_Lang, T_Size_Unit, T_Special_Group } from "../types";
+import { T_Controller, T_Filters, T_ID, T_Item_Admin_Common, T_Item_Admin_Full, T_Item_Admin_Full_Response, T_Item_Body, T_Item_Public_Common, T_Item_Public_Full, T_Item_Public_Full_Response, T_Item_Public_Short, T_Lang, T_Size_Unit, T_Special_Group } from "../types";
 import { custom_error, server_error } from "../util/error_handlers";
 
 export const get_all_items_public: T_Controller = async function(req, res) {
@@ -92,7 +92,7 @@ export const get_item_admin: T_Controller = async function(req, res) {
 
     const response = item.rows.reduce((prev: T_Item_Admin_Full_Response, current: T_Item_Admin_Full) => {
       const obj = {} as T_Item_Admin_Common;
-      const common_keys = ["id", "category_id", "label_am", "label_ru", "name_am", "name_ru"] as (keyof T_Item_Admin_Common)[];
+      const common_keys = ["id", "category_id", "name_am", "name_ru"] as (keyof T_Item_Admin_Common)[];
       const variant = JSON.parse(JSON.stringify(current));
       common_keys.forEach((key: keyof T_Item_Admin_Common) => {
         obj[key] = current[key];
@@ -113,12 +113,18 @@ export const get_item_admin: T_Controller = async function(req, res) {
   }
 } 
 
-export const add_item: T_Controller = async function() {
+export const add_item: T_Controller = async function(req, res) {
+  const { body } = req as { body: T_Item_Body };
   
   try {
+    const response = await Db.add_item(body);
+    if (response instanceof Db.Db_Error_Response) {
+      return custom_error(res, 500, "Item fetching error");
+    }
     
+    res.sendStatus(200);
   } catch (error) {
-    
+    return server_error(res, "get_similar_items", error);
   }
 }
 

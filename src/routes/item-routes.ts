@@ -51,7 +51,8 @@ item_router.post(
   add_item
 );
 
-item_router.route("/item/admin/:id")
+item_router
+  .route("/item/admin/:id")
   .get(verify_jwt, get_item_admin)
   .put(verify_jwt, check_item_body, convert_photos_to_webp, edit_item)
   .delete(verify_jwt, delete_item);
