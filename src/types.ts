@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-type T_ID = string;
+export type T_ID = string;
 
 export type T_Controller = (req: Request, res: Response, next: NextFunction) => any;
 export type T_Lang = 'am' | 'ru';

@@ -1,7 +1,7 @@
 import express from "express";
 
-import { filter_items, get_similar_sorting, get_suggestion_sorting, get_user_sorting } from "../middleware/sorting";
-import { add_item, delete_item, edit_item, get_all_items_admin, get_all_items_public, get_item_admin, get_item_public } from "../controllers/item-controllers";
+import { filter_items, get_suggestion_sorting, get_user_sorting } from "../middleware/sorting";
+import { add_item, delete_item, edit_item, get_all_items_admin, get_all_items_public, get_item_admin, get_item_public, get_similar_items } from "../controllers/item-controllers";
 import { verify_jwt } from "../middleware/verify-jwt";
 import { check_item_body, check_lang } from "../middleware/checks";
 import { convert_photos_to_webp } from "../middleware/convert-photos";
@@ -32,8 +32,7 @@ item_router.get(
 item_router.get(
   "/public/similar",
   check_lang,
-  get_similar_sorting,
-  get_all_items_public
+  get_similar_items
 );
 
 item_router.get(
