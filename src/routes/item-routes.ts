@@ -1,6 +1,6 @@
 import express from "express";
 
-import { get_similar_sorting, get_suggestion_sorting, get_user_sorting } from "../middleware/sorting";
+import { filter_items, get_similar_sorting, get_suggestion_sorting, get_user_sorting } from "../middleware/sorting";
 import { add_item, delete_item, edit_item, get_all_items_admin, get_all_items_public, get_item_admin, get_item_public } from "../controllers/item-controllers";
 import { verify_jwt } from "../middleware/verify-jwt";
 import { check_item_body, check_lang } from "../middleware/checks";
@@ -11,6 +11,7 @@ const item_router = express.Router();
 item_router.get(
   "/public/all",
   check_lang,
+  filter_items,
   get_user_sorting,
   get_all_items_public
 );
@@ -37,6 +38,7 @@ item_router.get(
 
 item_router.get(
   "/admin/all",
+  filter_items,
   verify_jwt,
   get_user_sorting,
   get_all_items_admin
