@@ -15,6 +15,10 @@ export function check_name(name_am: string, name_ru: string) {
   if (!name_ru) return "Ռուսերեն անվանումը նշված չէ"; 
   if (typeof name_am !== "string") return `typeof name_am is ${typeof name_am}`;
   if (typeof name_ru !== "string") return `typeof name_ru is ${typeof name_ru}`;
+  const name_am_trimmed = name_am.trim();
+  const name_ru_trimmed = name_ru.trim();
+  if (name_am_trimmed.length < 1) return "Հայերեն անվանումը նշված չէ";
+  if (name_ru_trimmed.length < 1) return "Ռուսերեն անվանումը նշված չէ";
   return null;
 }
 
@@ -46,10 +50,14 @@ export function check_size(size_value: number, size_unit: T_Size_Unit) {
 }
 
 export function check_color(color_am: string, color_ru: string) {
-  if (!color_am) return "Հայերեն գույնի անվանումը նշված չէ"; 
-  if (!color_ru) return "Ռուսերեն գույնի անվանումը նշված չէ"; 
+  if (!color_am) return "Գույնի հայերեն անվանումը նշված չէ"; 
+  if (!color_ru) return "Գույնի ռուսերեն անվանումը նշված չէ"; 
   if (typeof color_am !== "string") return `typeof color_am is ${typeof color_am}`;
   if (typeof color_ru !== "string") return `typeof color_ru is ${typeof color_ru}`;
+  const color_am_trimmed = color_am.trim();
+  const color_ru_trimmed = color_ru.trim();
+  if (color_am_trimmed.length < 1) return "Գույնի հայերեն անվանումը նշված չէ";
+  if (color_ru_trimmed.length < 1) return "Գույնի ռուսերեն անվանումը նշված չէ";
   return null;
 }
 

@@ -27,8 +27,16 @@ export const check_item_body: T_Controller = function(req, res, next) {
   const name_error = check_name(name_am, name_ru);
   if (name_error) return custom_error(res, 400, name_error);
 
+  req.body = {
+    ...req.body,
+    name_am: name_am.trim(),
+    name_ru: name_ru.trim()
+  } as T_Item_Body;
+  
   if (!Array.isArray(variants)) return custom_error(res, 400, "variants is not iterable");
   if (variants.length < 1) return custom_error(res, 400, "Ապրանքը պետք է ունենա առնվազն մեկ տարբերակ");
+  
+  let item_index = 0;
   
   for (let {
     available, 
@@ -63,6 +71,14 @@ export const check_item_body: T_Controller = function(req, res, next) {
     const description_error = check_description(description_am, description_ru);
     if (description_error) return custom_error(res, 400, description_error);
 
+    req.body.variants[item_index] = {
+      ...req.body.variants[item_index],
+      color_am: color_am.trim(),
+      color_ru: color_ru.trim(),
+      description_am: description_am ? description_am.trim() : null,
+      description_ru: description_ru ? description_ru.trim() : null
+    };
+    
     const photo_error = check_photo(photo_src);
     if (photo_error) return custom_error(res, 400, photo_error);
 
@@ -71,6 +87,8 @@ export const check_item_body: T_Controller = function(req, res, next) {
 
     const available_error = check_available(available);
     if (available_error) return custom_error(res, 400, available_error);
+
+    item_index++;
   }
   
   next();
@@ -135,12 +153,24 @@ export const check_query: T_Controller = function(req, res, next) {
   next();
 }
 
-export function check_category_labels() {
+export const check_category_labels: T_Controller = function(req, res, next) {
+  const { label_am, label_ru } = req.body;
 
-}
+  if (!label_am) return custom_error(res, 400, "Կատեգորիայի հայերեն անվանումը նշված չէ");
+  if (!label_ru) return custom_error(res, 400, "Կատեգորիայի ռուսերեն անվանումը նշված չէ");
+  if (typeof label_am !== "string") return custom_error(res, 400, `typeof label_am is ${typeof label_am}`);
+  if (typeof label_ru !== "string") return custom_error(res, 400, `typeof label_ru is ${typeof label_ru}`);
+  const label_am_trimmed = label_am.trim();
+  const label_ru_trimmed = label_ru.trim();
+  if (label_am_trimmed.length < 1) return custom_error(res, 400, "Կատեգորիայի հայերեն անվանումը նշված չէ");
+  if (label_ru_trimmed.length < 1) return custom_error(res, 400, "Կատեգորիայի ռուսերեն անվանումը նշված չէ");
 
-export function check_if_category_empty() {
+  req.body = {
+    label_am: label_am_trimmed,
+    label_ru: label_ru_trimmed
+  }
   
+  next();
 }
 
 export function check_new_password() {

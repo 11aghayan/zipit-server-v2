@@ -165,6 +165,12 @@ export type T_Item_Body_Edit = {
   })[]
 };
 
-export type T_Category_Response_Full = T_Category & {
+export type T_Category_Response_Admin = T_Category & {
+  item_count: number;
+};
+
+export type T_Category_Response_Public = {
+  id: T_ID;
+  label: string;
   item_count: number;
 };
