@@ -11,6 +11,8 @@ import {
   delete_item
 } from './item-methods';
 
+import { get_photo } from './photo-methods';
+
 const {
   PG_USER: user,
   PG_HOST: host,
@@ -55,5 +57,6 @@ export {
   get_item_admin,
   add_item,
   edit_item,
-  delete_item
+  delete_item,
+  get_photo
 };
