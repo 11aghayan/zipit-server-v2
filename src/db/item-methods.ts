@@ -260,21 +260,21 @@ export async function add_item({ category_id, name_am, name_ru, variants }: T_It
         const size_id = (await db.query(
           `
             INSERT INTO 
-            item_size_tbl(size_value, size_unit)
-            VALUES($1, $2)
+            item_size_tbl(size_value, size_unit, item_id)
+            VALUES($1, $2, $3)
             RETURNING id;
           `,
-          [variant.size_value, variant.size_unit]
+          [variant.size_value, variant.size_unit, item_id]
         )).rows[0].id as T_ID;
   
         const color_id = (await db.query(
           `
             INSERT INTO 
-            item_color_tbl(color_am, color_ru)
-            VALUES($1, $2)
+            item_color_tbl(color_am, color_ru, item_id)
+            VALUES($1, $2, $3)
             RETURNING id;
           `,
-          [variant.color_am, variant.color_ru]
+          [variant.color_am, variant.color_ru, item_id]
         )).rows[0].id as T_ID;
   
         await db.query(
@@ -406,6 +406,21 @@ export async function edit_item(item: T_Item_Body_Edit & { id: T_ID }) {
   } catch (error) {
     await db.query("ROLLBACK;");
     error_logger("db -> item-methods -> edit_item\n", error);
+    return new Db_Error_Response(error);
+  }
+}
+
+export async function delete_item(id: T_ID) {
+  try {
+    await db.query(
+      `
+        DELETE FROM item_tbl
+        WHERE id = $1;
+      `,
+      [id]
+    );
+  } catch (error) {
+    error_logger("db -> item-methods -> delete_item\n", error);
     return new Db_Error_Response(error);
   }
 }

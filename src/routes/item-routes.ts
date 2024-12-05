@@ -43,9 +43,16 @@ item_router.get(
   get_all_items_admin
 );
 
+item_router.post(
+  "/item/admin",
+  verify_jwt,
+  check_item_body,
+  convert_photos_to_webp,
+  add_item
+);
+
 item_router.route("/item/admin/:id")
   .get(verify_jwt, get_item_admin)
-  .post(verify_jwt, check_item_body, convert_photos_to_webp, add_item)
   .put(verify_jwt, check_item_fk_ids, check_item_body, convert_photos_to_webp, edit_item)
   .delete(verify_jwt, delete_item);
 

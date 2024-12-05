@@ -7,7 +7,8 @@ import {
   get_all_items_admin,
   get_item_admin,
   add_item,
-  edit_item
+  edit_item,
+  delete_item
 } from './item-methods';
 
 const {
@@ -53,5 +54,6 @@ export {
   get_all_items_admin,
   get_item_admin,
   add_item,
-  edit_item
+  edit_item,
+  delete_item
 };

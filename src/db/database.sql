@@ -52,14 +52,26 @@ CREATE TABLE item_photo_tbl (
 
 CREATE TABLE item_size_tbl (
   id ID PRIMARY KEY,
+  item_id UUID NOT NULL,
   size_value INT NOT NULL,
-  size_unit SIZE_UNIT NOT NULL
+  size_unit SIZE_UNIT NOT NULL,
+
+  CONSTRAINT fk_item
+    FOREIGN KEY(item_id)
+    REFERENCES item_tbl(id)
+    ON DELETE CASCADE
 ); 
 
 CREATE TABLE item_color_tbl (
   id ID PRIMARY KEY,
+  item_id UUID NOT NULL,
   color_am VARCHAR(50) NOT NULL,
-  color_ru VARCHAR(50) NOT NULL
+  color_ru VARCHAR(50) NOT NULL,
+
+  CONSTRAINT fk_item
+    FOREIGN KEY(item_id)
+    REFERENCES item_tbl(id)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE item_info_tbl (
@@ -74,6 +86,7 @@ CREATE TABLE item_info_tbl (
   description_am TEXT,
   description_ru TEXT,
   special_group SPECIAL_GROUP,
+  available INT DEFAULT 1 NOT NULL,
   creation_date BIGINT DEFAULT trunc(extract(epoch from now() )*1000) NOT NULL,
 
   CONSTRAINT fk_item

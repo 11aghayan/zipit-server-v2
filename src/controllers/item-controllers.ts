@@ -143,6 +143,15 @@ export const edit_item: T_Controller = async function(req, res) {
   }
 }
 
-export async function delete_item() {
-
+export const delete_item: T_Controller = async function(req, res) {
+  const { id } = req.params;
+  try {
+    const response = await Db.delete_item(id);
+    if (response instanceof Db.Db_Error_Response) {
+      return custom_error(res, 500, "Item deleting error");
+    }
+    return res.sendStatus(200);
+  } catch (error) {
+    return server_error(res, "delete_item", error);
+  }
 }

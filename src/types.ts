@@ -36,12 +36,14 @@ export type T_Photo = {
 
 export type T_Size = {
   id: T_ID;
+  item_id: T_ID;
   size_value: number;
   size_unit: T_Size_Unit;
 };
 
 export type T_Color = {
   id: T_ID;
+  item_id: T_ID;
   color_am: string;
   color_ru: string;
 };
