@@ -50,7 +50,7 @@ export const refresh_token: T_Controller = async function(req, res) {
 }
 
 export const logout: T_Controller = async function(req, res) {
-  const { jwt: refresh_token } = req.cookies;
+  const refresh_token = req.cookies.jwt;
 
   if (!refresh_token) return res.sendStatus(200);
   

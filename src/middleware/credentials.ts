@@ -1,3 +1,4 @@
+import jwt, { VerifyErrors } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 import * as Db from "../db";
@@ -32,5 +33,17 @@ export const check_credentials: T_Controller = async function(req, res, next) {
 }
 
 export const verify_jwt: T_Controller = async function(req, res, next) {
-  next();
+  const { jwt: refresh_token } = req.cookies;
+  const { authorization } = req.headers;
+
+  if (!authorization || !refresh_token) return res.sendStatus(401);
+
+  const access_token = authorization.split(" ")[1];
+  
+  const handle_verification = (err: VerifyErrors | null) => {
+    if (err) return res.sendStatus(403);
+    next();
+  };
+  
+  jwt.verify(access_token, process.env.JWT_ACCESS_TOKEN_SECRET!, handle_verification)
 }
