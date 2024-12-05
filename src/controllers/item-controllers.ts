@@ -1,5 +1,5 @@
 import * as Db from "../db/db";
-import { T_Controller, T_Filters, T_ID, T_Item_Admin_Common, T_Item_Admin_Full, T_Item_Admin_Full_Response, T_Item_Body, T_Item_Body_Edit, T_Item_Public_Common, T_Item_Public_Full, T_Item_Public_Full_Response, T_Item_Public_Short, T_Lang, T_Size_Unit, T_Special_Group } from "../types";
+import { T_Controller, T_Filters, T_ID, T_Item_Admin_Common, T_Item_Admin_Full, T_Item_Admin_Full_Response, T_Item_Body, T_Item_Body_Edit, T_Item_Public_Common, T_Item_Public_Full, T_Item_Public_Full_Response, T_Lang, T_Size_Unit, T_Special_Group } from "../types";
 import { custom_error, server_error } from "../util/error_handlers";
 
 export const get_all_items_public: T_Controller = async function(req, res) {
@@ -153,5 +153,20 @@ export const delete_item: T_Controller = async function(req, res) {
     return res.sendStatus(200);
   } catch (error) {
     return server_error(res, "delete_item", error);
+  }
+}
+
+export const get_matching_items: T_Controller = async function(req, res) {
+  const { query, lang, limit } = req.query as { query: string, lang: T_Lang, limit: string };
+  
+  try {
+    const items = await Db.get_matching_items(query, lang, Number(limit));
+    if (items instanceof Db.Db_Error_Response) {
+      return custom_error(res, 500, "Items fetching error");
+    }
+
+    return res.status(200).json({ length: items.rows.length, items: items.rows });
+  } catch (error) {
+    return server_error(res, "get_matching_items", error);
   }
 }
