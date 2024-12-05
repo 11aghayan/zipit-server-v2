@@ -30,12 +30,35 @@ export const get_categories_admin: T_Controller = async function(req, res) {
   }
 }
 
-export async function add_category() {
-  
+export const add_category: T_Controller = async function(req, res) {
+  const { label_am, label_ru } = req.body;
+
+  try {
+    const response = await Db.add_category(label_am, label_ru);
+    if (response instanceof Db.Db_Error_Response) {
+      return custom_error(res, 500, "Category adding error");
+    }
+    
+    return res.sendStatus(201);
+  } catch (error) {
+    return server_error(res, "add_category", error);
+  }
 }
 
-export async function edit_category() {
+export const edit_category: T_Controller = async function(req, res) {
+  const { label_am, label_ru } = req.body;
+  const { id } = req.params;
   
+  try {
+    const response = await Db.edit_category(id, label_am, label_ru);
+    if (response instanceof Db.Db_Error_Response) {
+      return custom_error(res, 500, "Category editing error");
+    }
+
+    return res.sendStatus(200);
+  } catch (error) {
+    return server_error(res, "edit_category", error);
+  }
 }
 
 export async function delete_category() {

@@ -9,11 +9,11 @@ export async function get_all_items_public({ categories, special_groups, count }
       ` SELECT 
           ${short_items_keys(lang)}
         FROM item_tbl
-        INNER JOIN item_info_tbl
+        LEFT JOIN item_info_tbl
         ON item_tbl.id = item_info_tbl.item_id
-        INNER JOIN item_size_tbl
+        LEFT JOIN item_size_tbl
         ON item_info_tbl.size_id = item_size_tbl.id
-        INNER JOIN item_color_tbl
+        LEFT JOIN item_color_tbl
         ON item_info_tbl.color_id = item_color_tbl.id
         WHERE
         ($1::uuid[] IS NULL AND $2::char(3)[] IS NULL)
@@ -55,13 +55,13 @@ export async function get_item_public(id: string, lang: T_Lang) {
           special_group,
           available
         FROM item_tbl
-        INNER JOIN item_info_tbl
+        LEFT JOIN item_info_tbl
         ON item_tbl.id = item_info_tbl.item_id
-        INNER JOIN item_size_tbl
+        LEFT JOIN item_size_tbl
         ON item_info_tbl.size_id = item_size_tbl.id
-        INNER JOIN item_color_tbl
+        LEFT JOIN item_color_tbl
         ON item_info_tbl.color_id = item_color_tbl.id 
-        INNER JOIN category_tbl
+        LEFT JOIN category_tbl
         ON item_tbl.category_id = category_tbl.id
         WHERE item_tbl.id = $1;
       `,
@@ -83,11 +83,11 @@ export async function get_similar_items(category_id: T_ID, special_group: T_Spec
       `
         SELECT ${short_items_keys(lang)}
         FROM item_tbl
-        INNER JOIN item_info_tbl
+        LEFT JOIN item_info_tbl
         ON item_tbl.id = item_info_tbl.item_id
-        INNER JOIN item_size_tbl
+        LEFT JOIN item_size_tbl
         ON item_info_tbl.size_id = item_size_tbl.id
-        INNER JOIN item_color_tbl
+        LEFT JOIN item_color_tbl
         ON item_info_tbl.color_id = item_color_tbl.id
         WHERE category_id = $1
         LIMIT $2;
@@ -102,11 +102,11 @@ export async function get_similar_items(category_id: T_ID, special_group: T_Spec
         `
           SELECT ${short_items_keys(lang)}
           FROM item_tbl
-          INNER JOIN item_info_tbl
+          LEFT JOIN item_info_tbl
           ON item_tbl.id = item_info_tbl.item_id
-          INNER JOIN item_size_tbl
+          LEFT JOIN item_size_tbl
           ON item_info_tbl.size_id = item_size_tbl.id
-          INNER JOIN item_color_tbl
+          LEFT JOIN item_color_tbl
           ON item_info_tbl.color_id = item_color_tbl.id
           WHERE special_group = $1
           LIMIT $2;
@@ -124,11 +124,11 @@ export async function get_similar_items(category_id: T_ID, special_group: T_Spec
         `
           SELECT ${short_items_keys(lang)}
           FROM item_tbl
-          INNER JOIN item_info_tbl
+          LEFT JOIN item_info_tbl
           ON item_tbl.id = item_info_tbl.item_id
-          INNER JOIN item_size_tbl
+          LEFT JOIN item_size_tbl
           ON item_info_tbl.size_id = item_size_tbl.id
-          INNER JOIN item_color_tbl
+          LEFT JOIN item_color_tbl
           ON item_info_tbl.color_id = item_color_tbl.id
           WHERE size_unit = $1
           LIMIT $2;
@@ -146,11 +146,11 @@ export async function get_similar_items(category_id: T_ID, special_group: T_Spec
         `
           SELECT ${short_items_keys(lang)}
           FROM item_tbl
-          INNER JOIN item_info_tbl
+          LEFT JOIN item_info_tbl
           ON item_tbl.id = item_info_tbl.item_id
-          INNER JOIN item_size_tbl
+          LEFT JOIN item_size_tbl
           ON item_info_tbl.size_id = item_size_tbl.id
-          INNER JOIN item_color_tbl
+          LEFT JOIN item_color_tbl
           ON item_info_tbl.color_id = item_color_tbl.id
           ORDER BY 
             CASE special_group
@@ -183,11 +183,11 @@ export async function get_all_items_admin({ categories, special_groups, count }:
           item_tbl.id,
           name_am as name
         FROM item_tbl
-        INNER JOIN item_info_tbl
+        LEFT JOIN item_info_tbl
         ON item_tbl.id = item_info_tbl.item_id
-        INNER JOIN item_size_tbl
+        LEFT JOIN item_size_tbl
         ON item_info_tbl.size_id = item_size_tbl.id
-        INNER JOIN item_color_tbl
+        LEFT JOIN item_color_tbl
         ON item_info_tbl.color_id = item_color_tbl.id
         WHERE
         ($1::uuid[] IS NULL AND $2::char(3)[] IS NULL)
@@ -212,13 +212,13 @@ export async function get_item_admin(id: T_ID) {
       `
         SELECT *
         FROM item_tbl
-        INNER JOIN item_info_tbl
+        LEFT JOIN item_info_tbl
         ON item_tbl.id = item_info_tbl.item_id
-        INNER JOIN item_size_tbl
+        LEFT JOIN item_size_tbl
         ON item_info_tbl.size_id = item_size_tbl.id
-        INNER JOIN item_color_tbl
+        LEFT JOIN item_color_tbl
         ON item_info_tbl.color_id = item_color_tbl.id
-        INNER JOIN item_photo_tbl
+        LEFT JOIN item_photo_tbl
         ON item_info_tbl.photo_id = item_photo_tbl.id
         WHERE item_tbl.id = $1;
       `,
@@ -431,13 +431,13 @@ export async function get_matching_items(query: string, lang: T_Lang, limit: num
       `
         SELECT ${short_items_keys(lang)}
         FROM item_tbl
-        INNER JOIN category_tbl
+        LEFT JOIN category_tbl
         ON category_tbl.id = item_tbl.category_id
-        INNER JOIN item_info_tbl
+        LEFT JOIN item_info_tbl
         ON item_tbl.id = item_info_tbl.item_id
-        INNER JOIN item_size_tbl
+        LEFT JOIN item_size_tbl
         ON item_info_tbl.size_id = item_size_tbl.id
-        INNER JOIN item_color_tbl
+        LEFT JOIN item_color_tbl
         ON item_info_tbl.color_id = item_color_tbl.id 
         WHERE 
           name_am ILIKE $1

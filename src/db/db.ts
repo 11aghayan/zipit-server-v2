@@ -16,7 +16,9 @@ import { get_photo } from './photo-methods';
 
 import { 
   get_categories_admin,
-  get_categories_public
+  get_categories_public,
+  add_category,
+  edit_category
  } from "./category-methods";
 
 const {
@@ -67,5 +69,7 @@ export {
   get_photo,
   get_matching_items,
   get_categories_admin,
-  get_categories_public
+  get_categories_public,
+  add_category,
+  edit_category
 };
