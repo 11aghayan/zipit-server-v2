@@ -23,7 +23,8 @@ import {
  } from "./category-methods";
 
 import {
-  get_credentials
+  get_credentials,
+  update_refresh_token
 } from "./auth-methods";
  
 const {
@@ -78,5 +79,6 @@ export {
   add_category,
   edit_category,
   delete_category,
-  get_credentials
+  get_credentials,
+  update_refresh_token
 };

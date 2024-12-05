@@ -18,10 +18,12 @@ export const check_credentials: T_Controller = async function(req, res, next) {
       return custom_error(res, 400, "Credentials fetching error");
     }
 
+    if (response.rows.length < 1) return custom_error(res, 401, "Սխալ username կամ password");
+    
     const { password_hash } = response.rows[0];
     const is_password_correct = await bcrypt.compare(password, password_hash);
 
-    if (!is_password_correct) return custom_error(res, 403, "Սխալ username կամ password");
+    if (!is_password_correct) return custom_error(res, 401, "Սխալ username կամ password");
     
     next();
   } catch (error) {

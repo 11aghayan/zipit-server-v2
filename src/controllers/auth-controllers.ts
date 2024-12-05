@@ -1,9 +1,27 @@
 import jwt from "jsonwebtoken";
 
+import * as Db from "../db";
 import { T_Controller } from "../types";
+import { custom_error, server_error } from "../util/error_handlers";
 
-export const login: T_Controller = async function() {
+const { JWT_REFRESH_TOKEN_SECRET, JWT_ACCESS_TOKEN_SECRET } = process.env as { [key: string]: string };
+
+export const login: T_Controller = async function(req, res) {
+  const { username } = req.body;
   
+  try {
+    const access_token = jwt.sign({ username }, JWT_ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
+    const refresh_token = jwt.sign({ username }, JWT_REFRESH_TOKEN_SECRET, { expiresIn: "1d" });
+
+    const db_response = await  Db.update_refresh_token(refresh_token);
+    if (db_response instanceof Db.Db_Error_Response) return custom_error(res, 400, "Refresh token updating error");
+    
+    const MAX_AGE = 24 * 60 * 60 * 1000;
+    res.cookie('jwt', refresh_token, { httpOnly: true, sameSite: 'none', maxAge: MAX_AGE, secure: true });
+    return res.status(200).json({ access_token });
+  } catch (error) {
+    return server_error(res, "login", error);
+  }
 }
 
 export const refresh_token: T_Controller = async function() {

@@ -20,3 +20,18 @@ export async function get_credentials(username: string) {
     return new Db_Error_Response(error);
   }
 }
+
+export async function update_refresh_token(refresh_token: string | null) {
+  try {
+    await db.query(
+      `
+        UPDATE user_tbl
+        SET refresh_token = $1;
+      `,
+      [refresh_token]
+    );
+  } catch (error) {
+    error_logger("db -> auth-methods -> update_refresh_token\n", error);
+    return new Db_Error_Response(error);
+  }
+}
