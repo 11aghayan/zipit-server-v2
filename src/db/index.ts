@@ -24,7 +24,8 @@ import {
 
 import {
   get_credentials,
-  update_refresh_token
+  update_refresh_token,
+  get_user_by_refresh_token
 } from "./auth-methods";
  
 const {
@@ -80,5 +81,6 @@ export {
   edit_category,
   delete_category,
   get_credentials,
-  update_refresh_token
+  update_refresh_token,
+  get_user_by_refresh_token
 };

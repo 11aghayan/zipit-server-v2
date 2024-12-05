@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 
 import * as Db from "../db";
 import { T_Controller } from "../types";
@@ -24,14 +24,35 @@ export const login: T_Controller = async function(req, res) {
   }
 }
 
-export const refresh_token: T_Controller = async function() {
-  
+export const refresh_token: T_Controller = async function(req, res) {
+  const refresh_token = req.cookies.jwt;
+
+  if (!refresh_token) return res.sendStatus(401);
+  try {
+    const user = await Db.get_user_by_refresh_token(refresh_token);
+    if (user instanceof Db.Db_Error_Response) return custom_error(res, 400, "User fetching error");
+    if (user.rows.length < 1) return res.sendStatus(403);
+
+    const { username } = user.rows[0];
+    
+    const handle_verification = (err: VerifyErrors | null, decoded: JwtPayload | string | undefined) => {
+      if (err || username !== (decoded as JwtPayload)?.username) return res.sendStatus(403);
+      
+      const access_token = jwt.sign({ username }, JWT_ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
+
+      return res.status(200).json({ access_token });
+    };
+    
+    jwt.verify(refresh_token, JWT_REFRESH_TOKEN_SECRET, handle_verification);
+  } catch (error) {
+    return server_error(res, "refresh_token", error);
+  }
 }
 
-export const logout: T_Controller = async function() {
+export const logout: T_Controller = async function(req, res) {
 
 }
 
-export const change_password: T_Controller = async function() {
+export const change_password: T_Controller = async function(req, res) {
   
 }
