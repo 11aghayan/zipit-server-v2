@@ -1,9 +1,10 @@
 import "dotenv/config";
-import express from 'express';
-import cookieParser from 'cookie-parser';
+import express from "express";
+import cookieParser from "cookie-parser";
 
-import { error_logger } from "./util/error_handlers";
 import { cors, credentials } from "./middleware/cors";
+import { rate_limiter } from "./middleware/rate-limiter";
+import { error_logger } from "./util/error_handlers";
 import item_router from "./routes/item-routes";
 import photo_router from "./routes/photo-routes";
 import category_router from "./routes/category-routes";
@@ -14,6 +15,7 @@ const app = express();
 const BASE_URL = '/api/v2';
 
 // Middleware
+app.use(rate_limiter)
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 app.use(credentials);
