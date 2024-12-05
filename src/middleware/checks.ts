@@ -173,6 +173,19 @@ export const check_category_labels: T_Controller = function(req, res, next) {
   next();
 }
 
-export function check_new_password() {
+export const check_new_password: T_Controller = function(req, res, next) {
+  const { password, new_password } = req.body;
+
+  if (!password) return custom_error(res, 400, "Գաղտնաբառը բացակայում է");
+  if (!new_password) return custom_error(res, 400, "Նոր գաղտնաբառը բացակայում է");
+  if (typeof password !== "string") return custom_error(res, 400, `typeof password is ${typeof password}`); 
+  if (typeof new_password !== "string") return custom_error(res, 400, `typeof new_password is ${typeof new_password}`); 
   
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!,@,#,$,%,^,&,*,(,),?,>,<,-,_,{,}]).{8,}$/gm;
+  const is_format_correct = regex.test(new_password);
+  if (!is_format_correct) {
+    return custom_error(res, 400, "Գաղտնաբառը պետք է ունենա առնվազն 8 նիշի երկարություն և պարունակի հետևյալ նիշերից յուրաքանչյուրը. մեծատառ տառ, փոքրատառ տառ, թվանշան, հատուկ նշան (!,@,#,$,%,^,&,*,(,),?,>,<,-,_,{,})");
+  }
+
+  next();
 }

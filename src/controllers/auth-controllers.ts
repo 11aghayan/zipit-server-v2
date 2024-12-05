@@ -1,4 +1,5 @@
 import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 import * as Db from "../db";
 import { T_Controller } from "../types";
@@ -70,5 +71,25 @@ export const logout: T_Controller = async function(req, res) {
 }
 
 export const change_password: T_Controller = async function(req, res) {
-  
+  const { jwt: refresh_token } = req.cookies;
+  const { password, new_password } = req.body;
+
+  try {
+    const user = await Db.get_user_by_refresh_token(refresh_token);
+    if (user instanceof Db.Db_Error_Response) return custom_error(res, 400, "User fetching error");
+    if (user.rows.length < 1) return res.sendStatus(403);
+    const { username, password_hash } = user.rows[0];
+
+    const is_password_correct = await bcrypt.compare(password, password_hash);
+    if (!is_password_correct) return custom_error(res, 403, "Սխալ գաղտնաբառ");
+    
+    const new_password_hash = await bcrypt.hash(new_password, 10);
+
+    const response = await Db.change_user_password(username, new_password_hash);
+    if (response instanceof Db.Db_Error_Response) return custom_error(res, 400, "Password updating error");
+
+    return res.sendStatus(200);
+  } catch (error) {
+    return server_error(res, "change_password", error);
+  }
 }
