@@ -22,6 +22,10 @@ import {
   delete_category
  } from "./category-methods";
 
+import {
+  get_credentials
+} from "./auth-methods";
+ 
 const {
   PG_USER: user,
   PG_HOST: host,
@@ -73,5 +77,6 @@ export {
   get_categories_public,
   add_category,
   edit_category,
-  delete_category
+  delete_category,
+  get_credentials
 };

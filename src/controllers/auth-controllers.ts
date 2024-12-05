@@ -1,3 +1,5 @@
+import jwt from "jsonwebtoken";
+
 import { T_Controller } from "../types";
 
 export const login: T_Controller = async function() {

@@ -1,3 +1,34 @@
-export async function check_credentials() {
-  
+import bcrypt from "bcrypt";
+
+import * as Db from "../db";
+import { T_Controller } from "../types";
+import { custom_error, server_error } from "../util/error_handlers";
+
+export const check_credentials: T_Controller = async function(req, res, next) {
+  const { username, password } = req.body;
+
+  if (!username) return custom_error(res, 400, "username-ը բացակայում է");
+  if (!password) return custom_error(res, 400, "password-ը բացակայում է");
+  if (typeof username !== "string") return custom_error(res, 400, `typeof username is ${typeof username}`); 
+  if (typeof password !== "string") return custom_error(res, 400, `typeof password is ${typeof password}`); 
+
+  try {
+    const response = await Db.get_credentials(username);
+    if (response instanceof Db.Db_Error_Response) {
+      return custom_error(res, 400, "Credentials fetching error");
+    }
+
+    const { password_hash } = response.rows[0];
+    const is_password_correct = await bcrypt.compare(password, password_hash);
+
+    if (!is_password_correct) return custom_error(res, 403, "Սխալ username կամ password");
+    
+    next();
+  } catch (error) {
+   return server_error(res, "check_credentials", error); 
+  }
+}
+
+export const verify_jwt: T_Controller = async function(req, res, next) {
+  next();
 }

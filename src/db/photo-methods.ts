@@ -1,4 +1,4 @@
-import { db, Db_Error_Response, Db_Success_Response } from "./db";
+import { db, Db_Error_Response, Db_Success_Response } from ".";
 import { error_logger } from "../util/error_handlers";
 import { T_ID } from "../types";
 

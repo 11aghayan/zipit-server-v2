@@ -2,7 +2,7 @@ import express from "express";
 
 import { filter_items, get_suggestion_sorting, get_user_sorting } from "../middleware/sorting";
 import { add_item, delete_item, edit_item, get_all_items_admin, get_all_items_public, get_item_admin, get_item_public, get_matching_items, get_similar_items } from "../controllers/item-controllers";
-import { verify_jwt } from "../middleware/verify-jwt";
+import { verify_jwt } from "../middleware/credentials";
 import { check_item_body, check_item_fk_ids, check_lang, check_query } from "../middleware/checks";
 import { convert_photos_to_webp } from "../middleware/photo-actions";
 

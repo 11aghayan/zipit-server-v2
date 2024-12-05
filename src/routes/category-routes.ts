@@ -2,7 +2,7 @@ import express from "express";
 
 import { check_category_labels, check_lang } from "../middleware/checks";
 import { add_category, delete_category, edit_category, get_categories_public, get_categories_admin } from "../controllers/category-controllers";
-import { verify_jwt } from "../middleware/verify-jwt";
+import { verify_jwt } from "../middleware/credentials";
 
 const category_router = express.Router();
 

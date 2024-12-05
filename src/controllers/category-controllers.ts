@@ -1,4 +1,4 @@
-import * as Db from "../db/db";
+import * as Db from "../db";
 import { T_Controller, T_Lang } from "../types";
 import { custom_error, server_error } from "../util/error_handlers";
 

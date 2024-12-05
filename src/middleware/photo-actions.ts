@@ -1,6 +1,6 @@
 import sharp from "sharp";
 
-import * as Db from '../db/db';
+import * as Db from '../db';
 
 import { T_Controller, T_Item_Body } from "../types";
 import { custom_error, error_logger, server_error } from "../util/error_handlers";

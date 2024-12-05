@@ -2,7 +2,7 @@ import express from "express";
 
 import { check_credentials } from "../middleware/credentials";
 import { change_password, login, logout, refresh_token } from "../controllers/auth-controllers";
-import { verify_jwt } from "../middleware/verify-jwt";
+import { verify_jwt } from "../middleware/credentials";
 import { check_new_password } from "../middleware/checks";
 
 const auth_router = express.Router();
