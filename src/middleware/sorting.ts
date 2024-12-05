@@ -12,9 +12,8 @@ function get_sorting_name(key: string, lang: T_Lang) {
       return 'creation_time';
     
     default: 
-      return 'price';
+      return 'COALESCE(promo, price)';
   }
-
 }
 
 export const filter_items: T_Controller = function(req, _res, next) {
@@ -52,15 +51,24 @@ export const get_user_sorting: T_Controller = function(req, res, next) {
   const name = get_sorting_name(key, lang); 
   const dir = direction.toUpperCase();
   
-  req.body.sorting = `${name} ${dir}`;
+  req.body.sorting = `${name} ${dir} NULLS LAST`;
   next();
   
 }
 
-export function get_suggestion_sorting() {
-
-}
-
-export function get_similar_sorting() {
-
+export const get_suggestion_sorting: T_Controller = function(req, _res, next) {
+  req.body.sorting = `
+    CASE special_group
+        WHEN 'liq' THEN 1
+        WHEN 'promo' THEN 2
+        WHEN 'new' THEN 3
+        ELSE 4
+    END
+  `;
+  req.body.filters = {
+    special_groups: null,
+    categories: null,
+    count: 10
+  };
+  next();
 }
