@@ -1,5 +1,5 @@
 import * as Db from "../db/db";
-import { T_Controller, T_Filters, T_ID, T_Item_Admin_Common, T_Item_Admin_Full, T_Item_Admin_Full_Response, T_Item_Body, T_Item_Public_Common, T_Item_Public_Full, T_Item_Public_Full_Response, T_Item_Public_Short, T_Lang, T_Size_Unit, T_Special_Group } from "../types";
+import { T_Controller, T_Filters, T_ID, T_Item_Admin_Common, T_Item_Admin_Full, T_Item_Admin_Full_Response, T_Item_Body, T_Item_Body_Edit, T_Item_Public_Common, T_Item_Public_Full, T_Item_Public_Full_Response, T_Item_Public_Short, T_Lang, T_Size_Unit, T_Special_Group } from "../types";
 import { custom_error, server_error } from "../util/error_handlers";
 
 export const get_all_items_public: T_Controller = async function(req, res) {
@@ -77,7 +77,7 @@ export const get_all_items_admin: T_Controller = async function(req, res) {
     }
     return res.status(200).json({ length: items.rows.length, items: items.rows });
   } catch (error) {
-    return server_error(res, "get_similar_items", error);
+    return server_error(res, "get_all_items_admin", error);
   }
 }
 
@@ -119,17 +119,28 @@ export const add_item: T_Controller = async function(req, res) {
   try {
     const response = await Db.add_item(body);
     if (response instanceof Db.Db_Error_Response) {
-      return custom_error(res, 500, "Item fetching error");
+      return custom_error(res, 500, "Item adding error");
     }
     
-    res.sendStatus(200);
+    res.sendStatus(201);
   } catch (error) {
-    return server_error(res, "get_similar_items", error);
+    return server_error(res, "add_item", error);
   }
 }
 
-export async function edit_item() {
-
+export const edit_item: T_Controller = async function(req, res) {
+  const { body } = req as { body: T_Item_Body_Edit };
+  const { id } = req.params as { id: T_ID };
+  
+  try {
+    const response = await Db.edit_item({ ...body, id });
+    if (response instanceof Db.Db_Error_Response) {
+      return custom_error(res, 500, "Item editing error");
+    }
+    return res.sendStatus(200);
+  } catch (error) {
+    return server_error(res, "edit_item", error);
+  }
 }
 
 export async function delete_item() {

@@ -1,5 +1,5 @@
 import { db, Db_Error_Response, Db_Success_Response } from "./db";
-import { T_Filters, T_Item_Public_Full, T_Item_Public_Short, T_Lang, T_ID, T_Special_Group, T_Size_Unit, T_Item_Admin_Short, T_Item_Admin_Full, T_Item_Body } from "../types";
+import { T_Filters, T_Item_Public_Full, T_Item_Public_Short, T_Lang, T_ID, T_Special_Group, T_Size_Unit, T_Item_Admin_Short, T_Item_Admin_Full, T_Item_Body, T_Item_Body_Edit } from "../types";
 import { error_logger } from "../util/error_handlers";
 import { remove_duplicates, short_items_keys } from "../util/db-utils";
 
@@ -312,7 +312,6 @@ export async function add_item({ category_id, name_am, name_ru, variants }: T_It
           ]
         );
       })()
-      
     });
     
     await Promise.all(queries);
@@ -325,3 +324,88 @@ export async function add_item({ category_id, name_am, name_ru, variants }: T_It
   }
 }
 
+export async function edit_item(item: T_Item_Body_Edit & { id: T_ID }) {
+  try {
+    await db.query("BEGIN;");
+
+    await db.query(
+      `
+        UPDATE item_tbl
+        SET category_id = $1,
+            name_am = $2,
+            name_ru = $3
+        WHERE id = $4;
+      `,
+      [item.category_id, item.name_am, item.name_ru, item.id]
+    );
+    
+    const queries = item.variants.map(variant => {
+      return (
+        async function() {
+          await db.query(
+            `
+              UPDATE item_photo_tbl
+              SET src = $1
+              WHERE id = $2;
+            `,
+            [variant.photo_src, variant.photo_id]
+          );
+
+          await db.query(
+            `
+              UPDATE item_size_tbl
+              SET size_value = $1,
+                  size_unit = $2
+              WHERE id = $3;
+            `,
+            [variant.size_value, variant.size_unit, variant.size_id]
+          );
+
+          await db.query(
+            `
+              UPDATE item_color_tbl
+              SET color_am = $1,
+                  color_ru = $2
+              WHERE id = $3;
+            `,
+            [variant.color_am, variant.color_ru, variant.color_id]
+          );
+
+          await db.query(
+            `
+              UPDATE item_info_tbl
+              SET price = $1,
+                  promo = $2,
+                  min_order_value = $3,
+                  min_order_unit = $4,
+                  description_am = $5,
+                  description_ru = $6,
+                  special_group = $7,
+                  available = $8
+              WHERE photo_id = $9;
+            `,
+            [
+              variant.price, 
+              variant.promo, 
+              variant.min_order_value, 
+              variant.min_order_unit, 
+              variant.description_am, 
+              variant.description_ru,
+              variant.special_group,
+              variant.available,
+              variant.photo_id
+            ]
+          );
+        }
+      )();
+    })
+    
+    await Promise.all(queries);
+    
+    await db.query("COMMIT;");
+  } catch (error) {
+    await db.query("ROLLBACK;");
+    error_logger("db -> item-methods -> edit_item\n", error);
+    return new Db_Error_Response(error);
+  }
+}

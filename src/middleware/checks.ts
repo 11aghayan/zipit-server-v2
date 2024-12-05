@@ -1,6 +1,6 @@
-import { T_Controller, T_Item_Body } from "../types";
+import { T_Controller, T_Item_Body, T_Item_Body_Edit } from "../types";
 import { custom_error } from "../util/error_handlers";
-import { check_available, check_category, check_color, check_description, check_min_order, check_name, check_photo, check_price, check_promo, check_size, check_special_group } from "../util/item-utils";
+import { check_available, check_category, check_color, check_color_id, check_description, check_min_order, check_name, check_photo, check_photo_id, check_price, check_promo, check_size, check_size_id, check_special_group } from "../util/item-utils";
 
 const valid_langs = ["am", "ru"];
 
@@ -28,6 +28,7 @@ export const check_item_body: T_Controller = function(req, res, next) {
   if (name_error) return custom_error(res, 400, name_error);
 
   if (!Array.isArray(variants)) return custom_error(res, 400, "variants is not iterable");
+  if (variants.length < 1) return custom_error(res, 400, "Ապրանքը պետք է ունենա առնվազն մեկ տարբերակ");
   
   for (let {
     available, 
@@ -70,6 +71,26 @@ export const check_item_body: T_Controller = function(req, res, next) {
 
     const available_error = check_available(available);
     if (available_error) return custom_error(res, 400, available_error);
+  }
+  
+  next();
+}
+
+export const check_item_fk_ids: T_Controller = function(req, res, next) {
+  const { variants } = req.body as T_Item_Body_Edit;
+
+  if (!Array.isArray(variants)) return custom_error(res, 400, "variants is not iterable");
+  if (variants.length < 1) return custom_error(res, 400, "Ապրանքը պետք է ունենա առնվազն մեկ տարբերակ");
+  
+  for (let { photo_id, size_id, color_id } of variants) {
+    const photo_id_error = check_photo_id(photo_id);
+    if (photo_id_error) return custom_error(res, 400, photo_id_error);
+
+    const size_id_error = check_size_id(size_id);
+    if (size_id_error) return custom_error(res, 400, size_id_error);
+
+    const color_id_error = check_color_id(color_id);
+    if (color_id_error) return custom_error(res, 400, color_id_error);
   }
   
   next();

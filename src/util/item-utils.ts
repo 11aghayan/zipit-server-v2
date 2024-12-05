@@ -6,6 +6,7 @@ const valid_special_group: (T_Special_Group | null)[] = ["new", "prm", "liq", nu
 
 export function check_category(category_id: T_ID) {
   if (!category_id) return "category_id not provided";
+  if (typeof category_id !== "string") return `typeof category_id is ${typeof category_id}`;
   return null;
 }
 
@@ -83,5 +84,23 @@ export function check_special_group(special_group: T_Special_Group | null) {
 export function check_available(available: number) {
   if (typeof available !== "number") return `typeof available is ${typeof available}`;
   if (available < 0) return "Հասանելի քանակությունը պետք է լինի 0-ից մեծ կամ հավասար արժեք";
+  return null;
+}
+
+export function check_photo_id(photo_id: T_ID) {
+  if (!photo_id) return "photo_id not provided";
+  if (typeof photo_id !== "string") return `typeof photo_id is ${typeof photo_id}`;
+  return null;
+}
+
+export function check_size_id(size_id: T_ID) {
+  if (!size_id) return "size_id not provided";
+  if (typeof size_id !== "string") return `typeof size_id is ${typeof size_id}`;
+  return null;
+}
+
+export function check_color_id(color_id: T_ID) {
+  if (!color_id) return "color_id not provided";
+  if (typeof color_id !== "string") return `typeof color_id is ${typeof color_id}`;
   return null;
 }
