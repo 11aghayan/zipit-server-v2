@@ -164,3 +164,7 @@ export type T_Item_Body_Edit = {
     color_id: T_ID;
   })[]
 };
+
+export type T_Category_Response_Full = T_Category & {
+  item_count: number;
+};

@@ -14,6 +14,10 @@ import {
 
 import { get_photo } from './photo-methods';
 
+import { 
+  get_categories_full
+ } from "./category-methods";
+
 const {
   PG_USER: user,
   PG_HOST: host,
@@ -60,5 +64,6 @@ export {
   edit_item,
   delete_item,
   get_photo,
-  get_matching_items
+  get_matching_items,
+  get_categories_full
 };
