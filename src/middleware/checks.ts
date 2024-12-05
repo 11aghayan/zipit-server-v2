@@ -96,6 +96,22 @@ export const check_item_fk_ids: T_Controller = function(req, res, next) {
   next();
 }
 
+export const check_photo_sizes: T_Controller = function(req, res, next) {
+  const { width, height } = req.query;
+  if (!width) return custom_error(res, 400, "Image width not provided");
+  if (!height) return custom_error(res, 400, "Image height not provided");
+  
+  const num_width = Number(width);
+  const num_height = Number(height);
+  
+  if (isNaN(num_width)) return custom_error(res, 400, "Image width must be a numeric value");
+  if (isNaN(num_height)) return custom_error(res, 400, "Image height must be a numeric value");
+  if (num_width < 1) return custom_error(res, 400, "Image width must be value greater than or equal to 1");
+  if (num_height < 1) return custom_error(res, 400, "Image height must be value greater than or equal to 1");
+
+  next();
+}
+
 export function check_category_labels() {
 
 }
