@@ -424,3 +424,41 @@ export async function delete_item(id: T_ID) {
     return new Db_Error_Response(error);
   }
 }
+
+export async function get_matching_items(query: string, lang: T_Lang, limit: number) {
+  try {
+    const { rows } = await db.query(
+      `
+        SELECT ${short_items_keys(lang)}
+        FROM item_tbl
+        INNER JOIN category_tbl
+        ON category_tbl.id = item_tbl.category_id
+        INNER JOIN item_info_tbl
+        ON item_tbl.id = item_info_tbl.item_id
+        INNER JOIN item_size_tbl
+        ON item_info_tbl.size_id = item_size_tbl.id
+        INNER JOIN item_color_tbl
+        ON item_info_tbl.color_id = item_color_tbl.id 
+        WHERE 
+          name_am ILIKE $1
+          OR
+          name_ru ILIKE $1
+          OR
+          label_am ILIKE $1
+          OR
+          label_ru ILIKE $1
+          OR
+          description_am ILIKE $1
+          OR
+          description_ru ILIKE $1
+        LIMIT $2;
+      `,
+      [query, limit]
+    );
+
+    return new Db_Success_Response<T_Item_Public_Short>(rows);
+  } catch (error) {
+    error_logger("db -> item-methods -> get_matching_items\n", error);
+    return new Db_Error_Response(error);
+  }
+}

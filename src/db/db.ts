@@ -8,7 +8,8 @@ import {
   get_item_admin,
   add_item,
   edit_item,
-  delete_item
+  delete_item,
+  get_matching_items
 } from './item-methods';
 
 import { get_photo } from './photo-methods';
@@ -58,5 +59,6 @@ export {
   add_item,
   edit_item,
   delete_item,
-  get_photo
+  get_photo,
+  get_matching_items
 };

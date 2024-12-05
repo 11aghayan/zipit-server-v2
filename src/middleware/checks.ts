@@ -112,6 +112,29 @@ export const check_photo_sizes: T_Controller = function(req, res, next) {
   next();
 }
 
+export const check_query: T_Controller = function(req, res, next) {
+  const { query, limit } = req.query;
+
+  if (!query) return res.status(200).json({ length: 0, items: [] });
+  if (typeof query !== "string") return custom_error(res, 400, `typeof query is ${typeof query}`);
+  const query_trimmed = query.trim();
+  if (query_trimmed.length < 1) return res.status(200).json({ length: 0, items: [] });
+  const query_sliced = query_trimmed.slice(0, 100);
+  req.query.query = `%${query_sliced}%`;
+
+  if (
+      !limit 
+      || typeof(limit) !== "string" 
+      || isNaN(Number(limit))
+      || Number(limit) < 1
+      || Number(limit) > 100
+    ) req.query.limit = "10";
+
+  req.query.limit = Math.trunc(Number(limit)).toString();
+  
+  next();
+}
+
 export function check_category_labels() {
 
 }
