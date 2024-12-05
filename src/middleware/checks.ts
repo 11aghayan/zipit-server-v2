@@ -173,10 +173,6 @@ export const check_category_labels: T_Controller = function(req, res, next) {
   next();
 }
 
-export function check_if_category_empty() {
-  
-}
-
 export function check_new_password() {
   
 }

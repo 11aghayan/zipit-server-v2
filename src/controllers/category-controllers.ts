@@ -61,6 +61,22 @@ export const edit_category: T_Controller = async function(req, res) {
   }
 }
 
-export async function delete_category() {
+export const delete_category: T_Controller = async function(req, res) {
+  const { id } = req.params;
   
+  try {
+    const response = await Db.delete_category(id);
+
+    if (typeof response === "string") {
+      return custom_error(res, 400, response);
+    }
+    
+    if (response instanceof Db.Db_Error_Response) {
+      return custom_error(res, 500, "Category deletion error");
+    }
+
+    return res.sendStatus(200);
+  } catch (error) {
+    return server_error(res, "delete_category", error);
+  }
 }

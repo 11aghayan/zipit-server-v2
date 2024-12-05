@@ -18,7 +18,8 @@ import {
   get_categories_admin,
   get_categories_public,
   add_category,
-  edit_category
+  edit_category,
+  delete_category
  } from "./category-methods";
 
 const {
@@ -71,5 +72,6 @@ export {
   get_categories_admin,
   get_categories_public,
   add_category,
-  edit_category
+  edit_category,
+  delete_category
 };

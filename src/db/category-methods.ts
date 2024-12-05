@@ -77,3 +77,22 @@ export async function edit_category(id: T_ID,label_am: string, label_ru: string)
     return new Db_Error_Response(error);
   }
 }
+
+export async function delete_category(id: T_ID) {
+  try {
+    await db.query(
+      `
+        DELETE FROM category_tbl
+        WHERE id = $1;
+      `,
+      [id]
+    );
+  } catch (error) {
+    error_logger("db -> category-methods -> delete_category\n", error);
+    const pg_error = error as { code: string };
+    if (pg_error.code === "23503") {
+      return "Կատեգորիան ջնջելու համար այն չպետք է պարունակի որևէ ապրանք";
+    }
+    return new Db_Error_Response(error);
+  }
+}

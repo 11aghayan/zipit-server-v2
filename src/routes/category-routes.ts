@@ -1,6 +1,6 @@
 import express from "express";
 
-import { check_category_labels, check_if_category_empty, check_lang } from "../middleware/checks";
+import { check_category_labels, check_lang } from "../middleware/checks";
 import { add_category, delete_category, edit_category, get_categories_public, get_categories_admin } from "../controllers/category-controllers";
 import { verify_jwt } from "../middleware/verify-jwt";
 
@@ -27,6 +27,6 @@ category_router.post(
 
 category_router.route("/:id")
   .put(verify_jwt, check_category_labels, edit_category)
-  .delete(verify_jwt, check_if_category_empty, delete_category);
+  .delete(verify_jwt, delete_category);
 
 export default category_router;
