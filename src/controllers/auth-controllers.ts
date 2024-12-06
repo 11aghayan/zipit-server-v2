@@ -54,17 +54,6 @@ export const logout: T_Controller = async function(req, res) {
   const refresh_token = req.cookies.jwt;
 
   if (!refresh_token) return res.sendStatus(200);
-  
-  const user = await Db.get_user_by_refresh_token(refresh_token);
-  if (user instanceof Db.Db_Error_Response) return custom_error(res, 400, "User fetching error");
-
-  if (user.rows.length < 1) {
-    res.clearCookie("jwt", { httpOnly: true, sameSite: "none", secure: true });
-    return res.sendStatus(200);
-  }
-  
-  const response = await Db.update_refresh_token(null);
-  if (response instanceof Db.Db_Error_Response) return custom_error(res, 400, "Refresh token updating error");
 
   res.clearCookie("jwt", { httpOnly: true, sameSite: "none", secure: true });
   return res.sendStatus(200);
