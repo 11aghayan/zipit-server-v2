@@ -18,8 +18,7 @@ CREATE DOMAIN SPECIAL_GROUP AS CHAR(3)
 CREATE TABLE user_tbl (
   id ID PRIMARY KEY,
   username VARCHAR(50) UNIQUE NOT NULL,
-  password_hash VARCHAR(73) NOT NULL,
-  refresh_token TEXT
+  password_hash VARCHAR(73) NOT NULL
 );
 
 CREATE TABLE category_tbl (

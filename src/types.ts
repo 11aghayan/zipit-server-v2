@@ -12,7 +12,6 @@ export type T_User = {
   id: T_ID;
   username: string;
   password_hash: string;
-  refresh_token: string | null;
 };
 
 export type T_Category = {

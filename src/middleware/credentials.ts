@@ -1,4 +1,4 @@
-import jwt, { VerifyErrors } from "jsonwebtoken";
+import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 import * as Db from "../db";
@@ -33,17 +33,15 @@ export const check_credentials: T_Controller = async function(req, res, next) {
 }
 
 export const verify_jwt: T_Controller = async function(req, res, next) {
-  const { jwt: refresh_token } = req.cookies;
-  const { authorization } = req.headers;
+  const { jwt_token } = req.cookies;
 
-  if (!authorization || !refresh_token) return custom_error(res, 401, "Unauthorized");
-
-  const access_token = authorization.split(" ")[1];
+  if (!jwt_token) return custom_error(res, 401, "Unauthorized");
   
-  const handle_verification = (err: VerifyErrors | null) => {
+  const handle_verification = (err: VerifyErrors | null, decoded: JwtPayload | string | undefined) => {
     if (err) return custom_error(res, 403, "Forbidden");
+    req.body.jwt_payload = decoded;
     next();
   };
   
-  jwt.verify(access_token, process.env.JWT_ACCESS_TOKEN_SECRET!, handle_verification)
+  jwt.verify(jwt_token, process.env.JWT_TOKEN_SECRET as string, handle_verification)
 }
