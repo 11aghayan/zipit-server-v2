@@ -28,16 +28,16 @@ export const login: T_Controller = async function(req, res) {
 export const refresh_token: T_Controller = async function(req, res) {
   const refresh_token = req.cookies.jwt;
 
-  if (!refresh_token) return res.sendStatus(401);
+  if (!refresh_token) return custom_error(res, 401, "Unauthorized");
   try {
     const user = await Db.get_user_by_refresh_token(refresh_token);
     if (user instanceof Db.Db_Error_Response) return custom_error(res, 400, "User fetching error");
-    if (user.rows.length < 1) return res.sendStatus(403);
+    if (user.rows.length < 1) return custom_error(res, 403, "Forbidden");
 
     const { username } = user.rows[0];
     
     const handle_verification = (err: VerifyErrors | null, decoded: JwtPayload | string | undefined) => {
-      if (err || username !== (decoded as JwtPayload)?.username) return res.sendStatus(403);
+      if (err || username !== (decoded as JwtPayload)?.username) return custom_error(res, 403, "Forbidden");
       
       const access_token = jwt.sign({ username }, JWT_ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
 
@@ -77,7 +77,7 @@ export const change_password: T_Controller = async function(req, res) {
   try {
     const user = await Db.get_user_by_refresh_token(refresh_token);
     if (user instanceof Db.Db_Error_Response) return custom_error(res, 400, "User fetching error");
-    if (user.rows.length < 1) return res.sendStatus(403);
+    if (user.rows.length < 1) return custom_error(res, 403, "Forbidden");
     const { username, password_hash } = user.rows[0];
 
     const is_password_correct = await bcrypt.compare(password, password_hash);

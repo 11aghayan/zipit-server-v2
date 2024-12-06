@@ -36,12 +36,12 @@ export const verify_jwt: T_Controller = async function(req, res, next) {
   const { jwt: refresh_token } = req.cookies;
   const { authorization } = req.headers;
 
-  if (!authorization || !refresh_token) return res.sendStatus(401);
+  if (!authorization || !refresh_token) return custom_error(res, 401, "Unauthorized");
 
   const access_token = authorization.split(" ")[1];
   
   const handle_verification = (err: VerifyErrors | null) => {
-    if (err) return res.sendStatus(403);
+    if (err) return custom_error(res, 403, "Forbidden");
     next();
   };
   
