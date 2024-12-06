@@ -51,11 +51,11 @@ export const refresh_token: T_Controller = async function(req, res) {
 }
 
 export const logout: T_Controller = async function(req, res) {
-  const refresh_token = req.cookies.jwt;
+  const { jwt:refresh_token, access_token } = req.cookies;
 
-  if (!refresh_token) return res.sendStatus(200);
-
-  res.clearCookie("jwt", { httpOnly: true, sameSite: "none", secure: true });
+  if (refresh_token) res.clearCookie("jwt", { httpOnly: true, sameSite: "none", secure: true });
+  if (access_token) res.clearCookie("access_token", { httpOnly: true });
+  
   return res.sendStatus(200);
 }
 
