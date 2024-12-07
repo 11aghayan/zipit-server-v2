@@ -1,20 +1,10 @@
 import { T_Controller, T_Filters, T_Lang } from "../types";
 import { custom_error } from "../util/error_handlers";
 
-const valid_sorting_keys = ["name", "price", "time"];
+const valid_sorting_keys = ["name", "price"];
 const valid_sorting_directions = ["asc", "desc"];
 
-function get_sorting_name(key: string, lang: T_Lang) {
-  switch(key) {
-    case 'name':
-      return `name_${lang}`;
-    case 'time':
-      return 'creation_time';
-    
-    default: 
-      return 'COALESCE(promo, price)';
-  }
-}
+const get_sorting_name = (key: string, lang: T_Lang) => key === "name" ? `name_${lang}` : "COALESCE(promo, price)";
 
 export const filter_items: T_Controller = function(req, _res, next) {
   const { special_groups, categories, count = "25", page = "1" } = req.query;
@@ -37,9 +27,9 @@ export const filter_items: T_Controller = function(req, _res, next) {
 }
 
 export const get_user_sorting: T_Controller = function(req, res, next) {
-  const { sortby, lang } = req.query as { sortby?: string, lang: T_Lang };
+  const { sortby, lang = "am" } = req.query as { sortby?: string, lang: T_Lang };
   
-  const default_sorting = 'creation_date ASC';
+  const default_sorting = `name_${lang}`;
   
   if (!sortby) {
     req.body.sorting = default_sorting;

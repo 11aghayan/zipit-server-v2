@@ -131,7 +131,7 @@ export type T_Item_Admin_Full_Response = T_Item_Admin_Common & {
   variants: T_Item_Admin_Variant[];
 };
 
-type T_Item_Body_Variant = {
+export type T_Item_Body_Variant = {
   price: number;
   promo: number | null;
   min_order_value: number
@@ -154,15 +154,24 @@ export type T_Item_Body = {
   variants: T_Item_Body_Variant[];
 };
 
+export type T_Item_Body_Variant_Edit = T_Item_Body_Variant & {
+  photo_id: T_ID;
+  size_id: T_ID;
+  color_id: T_ID;
+};
+
+export type T_Item_Body_Variant_Delete = {
+  photo_id: T_ID;
+  size_id: T_ID;
+  color_id: T_ID;
+  delete: boolean;
+}
+
 export type T_Item_Body_Edit = {
   category_id: T_ID;
   name_am: string;
   name_ru: string;
-  variants: (T_Item_Body_Variant & {
-    photo_id: T_ID;
-    size_id: T_ID;
-    color_id: T_ID;
-  })[]
+  variants: (T_Item_Body_Variant | T_Item_Body_Variant_Edit | T_Item_Body_Variant_Delete)[];
 };
 
 export type T_Category_Response_Admin = T_Category & {

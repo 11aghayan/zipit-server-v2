@@ -1,6 +1,20 @@
 import { T_Controller, T_Item_Body, T_Item_Body_Edit } from "../types";
 import { custom_error } from "../util/error_handlers";
-import { check_available, check_category, check_color, check_color_id, check_description, check_min_order, check_name, check_photo, check_photo_id, check_price, check_promo, check_size, check_size_id, check_special_group } from "../util/item-utils";
+import { 
+  check_available, 
+  check_category, 
+  check_color, 
+  check_color_id, 
+  check_description, 
+  check_min_order, 
+  check_name, 
+  check_photo, 
+  check_photo_id, 
+  check_price, 
+  check_promo, 
+  check_size, 
+  check_size_id, 
+  check_special_group } from "../util/item-utils";
 
 const valid_langs = ["am", "ru"];
 
@@ -36,79 +50,61 @@ export const check_item_body: T_Controller = function(req, res, next) {
   if (!Array.isArray(variants)) return custom_error(res, 400, "variants is not iterable");
   if (variants.length < 1) return custom_error(res, 400, "Ապրանքը պետք է ունենա առնվազն մեկ տարբերակ");
   
-  let item_index = 0;
+  let variant_index = 0;
   
-  for (let {
-    available, 
-    color_am, 
-    color_ru,
-    description_am,
-    description_ru,
-    min_order_unit,
-    min_order_value, 
-    photo_src,
-    price,
-    promo,
-    size_unit,
-    size_value,
-    special_group
-  } of variants) {
-    const price_error = check_price(price);
+  for (let variant of variants) {
+    
+    if ("photo_id" in variant && "size_id" in variant && "color_id" in variant) {
+      const photo_id_error = check_photo_id(variant.photo_id);
+      if (photo_id_error) return custom_error(res, 400, photo_id_error);
+
+      const size_id_error = check_size_id(variant.size_id);
+      if (size_id_error) return custom_error(res, 400, size_id_error);
+
+      const color_id_error = check_color_id(variant.color_id);
+      if (color_id_error) return custom_error(res, 400, color_id_error);
+    }
+    if ("delete" in variant) {
+      variant_index++;
+      continue;
+    }
+    
+    const price_error = check_price(variant.price);
     if (price_error) return custom_error(res, 400, price_error);
 
-    const promo_error = check_promo(promo);
+    const promo_error = check_promo(variant.promo);
     if (promo_error) return custom_error(res, 400, promo_error);
     
-    const size_error = check_size(size_value, size_unit);
+    const size_error = check_size(variant.size_value, variant.size_unit);
     if (size_error) return custom_error(res, 400, size_error);
     
-    const color_error = check_color(color_am, color_ru);
+    const color_error = check_color(variant.color_am, variant.color_ru);
     if (color_error) return custom_error(res, 400, color_error);
 
-    const min_order_error = check_min_order(min_order_value, min_order_unit);
+    const min_order_error = check_min_order(variant.min_order_value, variant.min_order_unit);
     if (min_order_error) return custom_error(res, 400, min_order_error);
     
-    const description_error = check_description(description_am, description_ru);
+    const description_error = check_description(variant.description_am, variant.description_ru);
     if (description_error) return custom_error(res, 400, description_error);
 
-    req.body.variants[item_index] = {
-      ...req.body.variants[item_index],
-      color_am: color_am.trim(),
-      color_ru: color_ru.trim(),
-      description_am: description_am ? description_am.trim() : null,
-      description_ru: description_ru ? description_ru.trim() : null
+    req.body.variants[variant_index] = {
+      ...req.body.variants[variant_index],
+      color_am: variant.color_am.trim(),
+      color_ru: variant.color_ru.trim(),
+      description_am: variant.description_am ? variant.description_am.trim() : null,
+      description_ru: variant.description_ru ? variant.description_ru.trim() : null
     };
-    
-    const photo_error = check_photo(photo_src);
+
+    const photo_error = check_photo(variant.photo_src);
     if (photo_error) return custom_error(res, 400, photo_error);
 
-    const special_group_error = check_special_group(special_group);
+    const special_group_error = check_special_group(variant.special_group);
     if (special_group_error) return custom_error(res, 400, special_group_error);
 
-    const available_error = check_available(available);
+    const available_error = check_available(variant.available);
     if (available_error) return custom_error(res, 400, available_error);
 
-    item_index++;
-  }
-  
-  next();
-}
-
-export const check_item_fk_ids: T_Controller = function(req, res, next) {
-  const { variants } = req.body as T_Item_Body_Edit;
-
-  if (!Array.isArray(variants)) return custom_error(res, 400, "variants is not iterable");
-  if (variants.length < 1) return custom_error(res, 400, "Ապրանքը պետք է ունենա առնվազն մեկ տարբերակ");
-  
-  for (let { photo_id, size_id, color_id } of variants) {
-    const photo_id_error = check_photo_id(photo_id);
-    if (photo_id_error) return custom_error(res, 400, photo_id_error);
-
-    const size_id_error = check_size_id(size_id);
-    if (size_id_error) return custom_error(res, 400, size_id_error);
-
-    const color_id_error = check_color_id(color_id);
-    if (color_id_error) return custom_error(res, 400, color_id_error);
+    variant_index++;
   }
   
   next();

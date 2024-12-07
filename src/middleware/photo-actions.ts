@@ -6,7 +6,10 @@ import { T_Controller, T_Item_Body } from "../types";
 import { custom_error, error_logger, server_error } from "../util/error_handlers";
 
 export const convert_photos_to_webp: T_Controller = async function(req, res, next) {
-  const { variants } = req.body as T_Item_Body;
+  const { variants: variants_full } = req.body as T_Item_Body;
+  
+  const variants = variants_full.filter(variant => !("delete" in variant));
+
   const converted_variants_promise = variants.map(async (variant) => {
     const { photo_src } = variant;
     const webp_format = "data:image/webp";
@@ -29,7 +32,10 @@ export const convert_photos_to_webp: T_Controller = async function(req, res, nex
 
   const converted_variants = await Promise.all(converted_variants_promise);
   if (converted_variants.includes(null)) return custom_error(res, 400, "Wrong image data");
-  req.body.variants = converted_variants;
+
+  const delete_variants = variants_full.filter(variant => "delete" in variant);
+
+  req.body.variants = [...delete_variants, ...converted_variants];
   next();
 }
 
