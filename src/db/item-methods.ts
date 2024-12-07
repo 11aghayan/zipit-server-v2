@@ -3,7 +3,7 @@ import { T_Filters, T_Item_Public_Full, T_Item_Public_Short, T_Lang, T_ID, T_Spe
 import { error_logger } from "../util/error_handlers";
 import { remove_duplicates, short_items_keys } from "../util/db-utils";
 
-export async function get_all_items_public({ categories, special_groups, count }: T_Filters, sorting: string, lang: T_Lang) {
+export async function get_all_items_public({ categories, special_groups, count, offset }: T_Filters, sorting: string, lang: T_Lang) {
   try {
     const { rows } = await db.query(
       ` SELECT 
@@ -20,9 +20,10 @@ export async function get_all_items_public({ categories, special_groups, count }
         OR 
         (category_id = ANY($1::uuid[]) OR special_group = ANY($2::char(3)[]))
         ORDER BY ${sorting}
-        LIMIT $3;
+        LIMIT $3
+        OFFSET $4;
       `,
-      [categories, special_groups, count]
+      [categories, special_groups, count, offset]
     );
     
     return new Db_Success_Response<T_Item_Public_Short>(rows);
@@ -175,7 +176,7 @@ export async function get_similar_items(category_id: T_ID, special_group: T_Spec
   }
 }
 
-export async function get_all_items_admin({ categories, special_groups, count }: T_Filters, sorting: string) {
+export async function get_all_items_admin({ categories, special_groups, count, offset }: T_Filters, sorting: string) {
   try {
     const { rows } = await db.query(
       `
@@ -194,9 +195,10 @@ export async function get_all_items_admin({ categories, special_groups, count }:
         OR 
         (category_id = ANY($1::uuid[]) OR special_group = ANY($2::char(3)[]))
         ORDER BY ${sorting}
-        LIMIT $3;
+        LIMIT $3
+        OFFSET $4;
       `,
-      [categories, special_groups, count]
+      [categories, special_groups, count, offset]
     );
 
     return new Db_Success_Response<T_Item_Admin_Short>(remove_duplicates(rows));

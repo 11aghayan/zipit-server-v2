@@ -67,6 +67,7 @@ export type T_Filters = {
   special_groups: string[] | null;
   categories: string[] | null;
   count: number;
+  offset: number;
 };
 
 export type T_Item_Public_Short = {

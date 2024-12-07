@@ -17,12 +17,20 @@ function get_sorting_name(key: string, lang: T_Lang) {
 }
 
 export const filter_items: T_Controller = function(req, _res, next) {
-  const { special_groups, categories, count } = req.query as { special_groups?: string, categories?: string, count?: string };
+  const { special_groups, categories, count = "25", page = "1" } = req.query;
+  
+  const count_num_unchecked = Number(count);
+  const page_num_unchecked = Number(page);
+  
+  const count_num = count_num_unchecked && !isNaN(count_num_unchecked) && count_num_unchecked > 0 ? count_num_unchecked : 25;
+  const page_num = page_num_unchecked && !isNaN(page_num_unchecked) && page_num_unchecked > 0 ? page_num_unchecked : 1;
+  const offset = (page_num - 1) * count_num;
   
   req.body.filters = {
-    special_groups: special_groups ? special_groups.split(",") : null,
-    categories: categories ? categories.split(",") : null,
-    count: count ? Number(count) : 25
+    special_groups: special_groups && typeof special_groups === "string" ? special_groups.split(",") : null,
+    categories: categories && typeof categories === "string" ? categories.split(",") : null,
+    count: count_num,
+    offset
   } as T_Filters;
 
   next();
@@ -68,7 +76,8 @@ export const get_suggestion_sorting: T_Controller = function(req, _res, next) {
   req.body.filters = {
     special_groups: null,
     categories: null,
-    count: 10
+    count: 10,
+    offset: 0
   };
   next();
 }

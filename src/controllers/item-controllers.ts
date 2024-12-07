@@ -11,7 +11,10 @@ export const get_all_items_public: T_Controller = async function(req, res) {
     if (items instanceof Db.Db_Error_Response) {
       return custom_error(res, 500, "Items fetching error");
     }
-    return res.status(200).json({ items_count: items.rows.length, items: items.rows });
+
+    const page = filters.offset / filters.count + 1;
+    
+    return res.status(200).json({ items_count: items.rows.length, page, items: items.rows });
   } catch (error) {
     return server_error(res, "get_all_items_public", error);
   }
@@ -75,7 +78,10 @@ export const get_all_items_admin: T_Controller = async function(req, res) {
     if (items instanceof Db.Db_Error_Response) {
       return custom_error(res, 500, "Items fetching error");
     }
-    return res.status(200).json({ length: items.rows.length, items: items.rows });
+
+    const page = filters.offset / filters.count + 1;
+    
+    return res.status(200).json({ length: items.rows.length, page, items: items.rows });
   } catch (error) {
     return server_error(res, "get_all_items_admin", error);
   }
