@@ -1,4 +1,4 @@
-import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 import * as Db from "../db";
@@ -10,10 +10,10 @@ const COOKIE_MAX_AGE = 3 * 60 * 60 * 1000;
 
 export const login: T_Controller = async function(req, res) {
   const { username } = req.body;
-  
+
   try {
     const jwt_token = jwt.sign({ username }, JWT_TOKEN_SECRET, { expiresIn: "3h" });
-    res.cookie('jwt_token', jwt_token, { httpOnly: true, sameSite: 'strict', maxAge: COOKIE_MAX_AGE, secure: false });
+    res.cookie('jwt_token', jwt_token, { httpOnly: true, sameSite: "strict", maxAge: COOKIE_MAX_AGE, secure: false });
     return res.sendStatus(200);
   } catch (error) {
     return server_error(res, "login", error);
@@ -22,7 +22,7 @@ export const login: T_Controller = async function(req, res) {
 
 export const logout: T_Controller = async function(req, res) {
   const { jwt_token } = req.cookies;
-  if (jwt_token) res.clearCookie("jwt_token", { httpOnly: true, sameSite: "none", secure: true });
+  if (jwt_token) res.clearCookie("jwt_token", { httpOnly: true, sameSite: "strict", secure: true });
   return res.sendStatus(200);
 }
 

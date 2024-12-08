@@ -13,10 +13,11 @@ export async function get_categories_admin() {
           COUNT(item_tbl.category_id) AS item_count
         FROM category_tbl
         LEFT JOIN item_tbl ON category_tbl.id = item_tbl.category_id
-        GROUP BY category_tbl.id, category_tbl.label_am, category_tbl.label_ru;
+        GROUP BY category_tbl.id, category_tbl.label_am, category_tbl.label_ru
+        ORDER BY category_tbl.label_am;
       `
     );
-
+    
     return new Db_Success_Response<T_Category_Response_Admin>(rows);
   } catch (error) {
     error_logger("db -> category-methods -> get_categories_admin\n", error);
@@ -34,11 +35,17 @@ export async function get_categories_public(lang: T_Lang) {
           COUNT(item_tbl.category_id) AS item_count
         FROM category_tbl
         LEFT JOIN item_tbl ON category_tbl.id = item_tbl.category_id
-        GROUP BY category_tbl.id, label;
+        GROUP BY category_tbl.id, label
+        ORDER BY category_tbl.label_${lang};
       `
     );
 
-    return new Db_Success_Response<T_Category_Response_Public>(rows);
+    const other = rows.find(r => r.label === "Այլ" || r.label === "Прочие");
+    const filtered_rows = rows.filter(r => r.id !== other.id);
+    
+    filtered_rows.push(other);
+    
+    return new Db_Success_Response<T_Category_Response_Public>(filtered_rows);
   } catch (error) {
     error_logger("db -> category-methods -> get_categories_public\n", error);
     return new Db_Error_Response(error);
