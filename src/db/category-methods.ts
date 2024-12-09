@@ -18,7 +18,7 @@ export async function get_categories_admin() {
       `
     );
     
-    const other = rows.find(r => r.label === "Այլ" || r.label === "Прочие");
+    const other = rows.find(r => r.label_am === "Այլ" || r.label_ru === "Прочие");
     const filtered_rows = rows.filter(r => r.id !== other.id);
     
     filtered_rows.push(other);
