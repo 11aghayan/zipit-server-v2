@@ -4,27 +4,59 @@ import { error_logger } from "../util/error_handlers";
 import { remove_duplicates, short_items_keys } from "../util/db-utils";
 import { create_item_variant, delete_item_variant, edit_item_variant } from "../util/item-utils";
 
-export async function get_all_items_public({ categories, special_groups, count, offset }: T_Filters, sorting: string, lang: T_Lang) {
+export async function get_all_items_public({ categories, special_groups, count, offset, search }: T_Filters, sorting: string, lang: T_Lang) {
   try {
     const { rows } = await db.query(
-      ` SELECT 
-          ${short_items_keys(lang)}
-        FROM item_tbl
-        LEFT JOIN item_info_tbl
-        ON item_tbl.id = item_info_tbl.item_id
-        LEFT JOIN item_size_tbl
-        ON item_info_tbl.size_id = item_size_tbl.id
-        LEFT JOIN item_color_tbl
-        ON item_info_tbl.color_id = item_color_tbl.id
-        WHERE
-        ($1::uuid[] IS NULL AND $2::char(3)[] IS NULL)
-        OR 
-        (category_id = ANY($1::uuid[]) OR special_group = ANY($2::char(3)[]))
-        ORDER BY ${sorting}
-        LIMIT $3
-        OFFSET $4;
+      ` 
+        SELECT 
+          i_id as id, 
+          name_${lang} as name,
+          photo_id,
+          price,
+          promo,
+          special_group,
+          size_value,
+          size_unit,
+          color_${lang} as color,
+          count
+        FROM (
+          SELECT 
+            *,
+            item_tbl.id as i_id,
+            COUNT(*) OVER()
+          FROM item_tbl
+          LEFT JOIN item_info_tbl
+            ON item_tbl.id = item_info_tbl.item_id
+          LEFT JOIN item_size_tbl
+            ON item_info_tbl.size_id = item_size_tbl.id
+          LEFT JOIN item_color_tbl
+            ON item_info_tbl.color_id = item_color_tbl.id
+          LEFT JOIN category_tbl
+            ON category_tbl.id = item_tbl.category_id
+          WHERE
+            (
+              ($1::uuid[] IS NULL AND $2::char(3)[] IS NULL)
+              OR 
+              (category_id = ANY($1::uuid[]) OR special_group = ANY($2::char(3)[]))
+            )
+            AND
+            (
+              $5::TEXT IS NULL
+              OR
+              name_am ILIKE $5
+              OR
+              name_ru ILIKE $5
+              OR
+              label_am ILIKE $5
+              OR
+              label_ru ILIKE $5
+            )
+          ORDER BY ${sorting}
+          LIMIT $3
+          OFFSET $4
+        );
       `,
-      [categories, special_groups, count, offset]
+      [categories, special_groups, count, offset, search]
     );
     
     return new Db_Success_Response<T_Item_Public_Short>(rows);
@@ -177,34 +209,58 @@ export async function get_similar_items(category_id: T_ID, special_group: T_Spec
   }
 }
 
-export async function get_all_items_admin({ categories, special_groups, count, offset }: T_Filters, sorting: string) {
+export async function get_all_items_admin({ categories, special_groups, count, offset, search }: T_Filters, sorting: string) {
   try {
     const { rows } = await db.query(
-      `
-        SELECT
-          item_tbl.id as id,
-          name_am as name,
-          item_info_tbl.photo_id as photo_id
-        FROM item_tbl
-        LEFT JOIN item_info_tbl
-          ON item_tbl.id = item_info_tbl.item_id
-        LEFT JOIN item_size_tbl
-          ON item_info_tbl.size_id = item_size_tbl.id
-        LEFT JOIN item_color_tbl
-          ON item_info_tbl.color_id = item_color_tbl.id
-        WHERE
-          ($1::uuid[] IS NULL AND $2::char(3)[] IS NULL)
-          OR 
-          (category_id = ANY($1::uuid[]) OR special_group = ANY($2::char(3)[]))
-        ORDER BY ${sorting}
-        LIMIT $3
-        OFFSET $4;
+      `SELECT 
+          i_id as id,
+          name,
+          p_id as photo_id,
+          count
+        FROM(
+          SELECT
+            item_tbl.id as i_id,
+            item_tbl.name_am as name,
+            item_info_tbl.photo_id as p_id,
+            *,
+            COUNT(*) OVER()
+          FROM item_tbl
+          LEFT JOIN item_info_tbl
+            ON item_tbl.id = item_info_tbl.item_id
+          LEFT JOIN item_size_tbl
+            ON item_info_tbl.size_id = item_size_tbl.id
+          LEFT JOIN item_color_tbl
+            ON item_info_tbl.color_id = item_color_tbl.id
+          LEFT JOIN category_tbl
+            ON category_tbl.id = item_tbl.category_id
+          WHERE
+            (
+              ($1::uuid[] IS NULL AND $2::char(3)[] IS NULL)
+              OR 
+              (category_id = ANY($1::uuid[]) OR special_group = ANY($2::char(3)[]))
+            )
+            AND
+            (
+              $5::TEXT IS NULL
+              OR
+              name_am ILIKE $5
+              OR
+              name_ru ILIKE $5
+              OR
+              label_am ILIKE $5
+              OR
+              label_ru ILIKE $5
+            )
+          ORDER BY ${sorting}
+          LIMIT $3
+          OFFSET $4
+        );
       `,
-      [categories, special_groups, count, offset]
+      [categories, special_groups, count, offset, search]
     );
 
     const filtered_rows = remove_duplicates(rows);
-    
+
     return new Db_Success_Response<T_Item_Admin_Short>(filtered_rows);
   } catch (error) {
     error_logger("db -> item-methods -> get_all_items_admin\n", error);
@@ -350,5 +406,3 @@ export async function get_matching_items(query: string, lang: T_Lang, limit: num
     return new Db_Error_Response(error);
   }
 }
-
-

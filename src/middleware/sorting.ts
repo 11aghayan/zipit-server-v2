@@ -7,7 +7,7 @@ const valid_sorting_directions = ["asc", "desc"];
 const get_sorting_name = (key: string, lang: T_Lang) => key === "name" ? `name_${lang}` : "COALESCE(promo, price)";
 
 export const filter_items: T_Controller = function(req, _res, next) {
-  const { special_groups, categories, count = "25", page = "1" } = req.query;
+  const { special_groups, categories, count = "25", page = "1", search } = req.query;
   
   const count_num_unchecked = Number(count);
   const page_num_unchecked = Number(page);
@@ -20,7 +20,8 @@ export const filter_items: T_Controller = function(req, _res, next) {
     special_groups: special_groups && typeof special_groups === "string" ? special_groups.split(",") : null,
     categories: categories && typeof categories === "string" ? categories.split(",") : null,
     count: count_num,
-    offset
+    offset,
+    search: typeof search === "string" && search.length > 0 ? `%${search}%` : null
   } as T_Filters;
 
   next();

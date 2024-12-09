@@ -68,6 +68,7 @@ export type T_Filters = {
   categories: string[] | null;
   count: number;
   offset: number;
+  search: string | null;
 };
 
 export type T_Item_Public_Short = {
@@ -80,6 +81,7 @@ export type T_Item_Public_Short = {
   size_value: number;
   size_unit: T_Size_Unit;
   color_ru: string;
+  count: string;
 };
 
 export type T_Item_Public_Common = {
@@ -115,6 +117,7 @@ export type T_Item_Admin_Short = {
   id: T_ID;
   name: string;
   photo_id: string;
+  count: string;
 };
 
 export type T_Item_Admin_Common = {
