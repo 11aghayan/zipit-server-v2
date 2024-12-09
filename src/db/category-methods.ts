@@ -18,7 +18,12 @@ export async function get_categories_admin() {
       `
     );
     
-    return new Db_Success_Response<T_Category_Response_Admin>(rows);
+    const other = rows.find(r => r.label === "Այլ" || r.label === "Прочие");
+    const filtered_rows = rows.filter(r => r.id !== other.id);
+    
+    filtered_rows.push(other);
+    
+    return new Db_Success_Response<T_Category_Response_Admin>(filtered_rows);
   } catch (error) {
     error_logger("db -> category-methods -> get_categories_admin\n", error);
     return new Db_Error_Response(error);

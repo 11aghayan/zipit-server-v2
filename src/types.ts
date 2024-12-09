@@ -114,6 +114,7 @@ export type T_Item_Public_Full_Response = T_Item_Public_Common & {
 export type T_Item_Admin_Short = {
   id: T_ID;
   name: string;
+  photo_id: string;
 };
 
 export type T_Item_Admin_Common = {
