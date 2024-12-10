@@ -103,7 +103,7 @@ export async function delete_category(id: T_ID) {
     error_logger("db -> category-methods -> delete_category\n", error);
     const pg_error = error as { code: string };
     if (pg_error.code === "23503") {
-      return "Կատեգորիան ջնջելու համար այն չպետք է պարունակի որևէ ապրանք";
+      return "Կատեգորիան ջնջելու համար այն պետք է չպարունակի որևէ ապրանք";
     }
     return new Db_Error_Response(error);
   }
