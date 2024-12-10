@@ -31,8 +31,6 @@ export async function get_all_items_public({ categories, special_groups, count, 
             ON item_info_tbl.size_id = item_size_tbl.id
           LEFT JOIN item_color_tbl
             ON item_info_tbl.color_id = item_color_tbl.id
-          LEFT JOIN category_tbl
-            ON category_tbl.id = item_tbl.category_id
           WHERE
             (
               ($1::uuid[] IS NULL AND $2::char(3)[] IS NULL)
@@ -46,10 +44,6 @@ export async function get_all_items_public({ categories, special_groups, count, 
               name_am ILIKE $5
               OR
               name_ru ILIKE $5
-              OR
-              label_am ILIKE $5
-              OR
-              label_ru ILIKE $5
             )
           ORDER BY ${sorting}
           LIMIT $3
@@ -231,8 +225,6 @@ export async function get_all_items_admin({ categories, special_groups, count, o
             ON item_info_tbl.size_id = item_size_tbl.id
           LEFT JOIN item_color_tbl
             ON item_info_tbl.color_id = item_color_tbl.id
-          LEFT JOIN category_tbl
-            ON category_tbl.id = item_tbl.category_id
           WHERE
             (
               ($1::uuid[] IS NULL AND $2::char(3)[] IS NULL)
@@ -246,10 +238,6 @@ export async function get_all_items_admin({ categories, special_groups, count, o
               name_am ILIKE $5
               OR
               name_ru ILIKE $5
-              OR
-              label_am ILIKE $5
-              OR
-              label_ru ILIKE $5
             )
           ORDER BY ${sorting}
           LIMIT $3
