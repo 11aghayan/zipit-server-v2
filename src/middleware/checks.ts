@@ -101,6 +101,14 @@ export const check_item_body: T_Controller = function(req, res, next) {
     const special_group_error = check_special_group(variant.special_group);
     if (special_group_error) return custom_error(res, 400, special_group_error);
 
+    if (variant.promo !== null && variant.special_group === null) {
+      req.body.variant[variant_index].special_group = "prm";
+    }
+
+    if (variant.promo === null && variant.special_group === "prm") {
+      req.body.variant[variant_index].special_group = null;
+    }
+    
     const available_error = check_available(variant.available);
     if (available_error) return custom_error(res, 400, available_error);
 
