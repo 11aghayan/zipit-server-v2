@@ -302,6 +302,8 @@ export async function add_item({ category_id, name_am, name_ru, variants }: T_It
     await Promise.all(queries);
     
     await db.query("COMMIT;");
+
+    return new Db_Success_Response<T_ID>([item_id]);
   } catch (error) {
     await db.query("ROLLBACK;");
     error_logger("db -> item-methods -> add_item\n", error);

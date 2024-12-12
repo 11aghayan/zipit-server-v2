@@ -115,7 +115,7 @@ export const get_item_admin: T_Controller = async function(req, res) {
   }
 } 
 
-export const add_item: T_Controller = async function(req, res) {
+export const add_item: T_Controller = async function(req, res, next) {
   const { body } = req as { body: T_Item_Body };
   
   try {
@@ -124,7 +124,9 @@ export const add_item: T_Controller = async function(req, res) {
       return custom_error(res, 500, "Item adding error");
     }
     
-    res.sendStatus(201);
+    const id = response.rows[0];
+    req.params.id = id;
+    return await get_item_admin(req, res, next);
   } catch (error) {
     return server_error(res, "add_item", error);
   }
