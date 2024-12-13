@@ -258,9 +258,9 @@ export async function get_all_items_admin({ categories, special_groups, count, o
 
 export async function get_item_admin(id: T_ID) {
   try {
-    const { rows } = await db.query(
+    const rows = (await db.query(
       `
-        SELECT *
+        SELECT item_tbl.id as i_id, *
         FROM item_tbl
         LEFT JOIN item_info_tbl
         ON item_tbl.id = item_info_tbl.item_id
@@ -273,8 +273,13 @@ export async function get_item_admin(id: T_ID) {
         WHERE item_tbl.id = $1;
       `,
       [id]
-    );
-
+    )).rows.map(item => {
+      const temp = JSON.parse(JSON.stringify(item));
+      temp.id = temp.i_id;
+      delete temp.i_id;
+      return temp;
+    });
+    
     return new Db_Success_Response<T_Item_Admin_Full>(rows);
   } catch (error) {
     error_logger("db -> item-methods -> get_item_admin\n", error);

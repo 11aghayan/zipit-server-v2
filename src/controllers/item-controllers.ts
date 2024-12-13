@@ -92,6 +92,8 @@ export const get_item_admin: T_Controller = async function(req, res) {
       return custom_error(res, 500, "Item fetching error");
     }    
 
+    if (item.rows.length < 1) return custom_error(res, 404, "No items found"); 
+    
     const response = item.rows.reduce((prev: T_Item_Admin_Full_Response, current: T_Item_Admin_Full) => {
       const obj = {} as T_Item_Admin_Common;
       const common_keys = ["id", "category_id", "name_am", "name_ru"] as (keyof T_Item_Admin_Common)[];
@@ -123,7 +125,7 @@ export const add_item: T_Controller = async function(req, res, next) {
     if (response instanceof Db.Db_Error_Response) {
       return custom_error(res, 500, "Item adding error");
     }
-    
+
     const id = response.rows[0];
     req.params.id = id;
     return await get_item_admin(req, res, next);
@@ -132,7 +134,7 @@ export const add_item: T_Controller = async function(req, res, next) {
   }
 }
 
-export const edit_item: T_Controller = async function(req, res) {
+export const edit_item: T_Controller = async function(req, res, next) {
   const { body } = req as { body: T_Item_Body_Edit };
   const { id } = req.params as { id: T_ID };
   
@@ -141,7 +143,8 @@ export const edit_item: T_Controller = async function(req, res) {
     if (response instanceof Db.Db_Error_Response) {
       return custom_error(res, 500, "Item editing error");
     }
-    return res.sendStatus(200);
+
+    return await get_item_admin(req, res, next);
   } catch (error) {
     return server_error(res, "edit_item", error);
   }

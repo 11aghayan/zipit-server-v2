@@ -11,18 +11,18 @@ export const convert_photos_to_webp: T_Controller = async function(req, res, nex
   const variants = variants_full.filter(variant => !("delete" in variant));
 
   const converted_variants_promise = variants.map(async (variant) => {
-    const { photo_src } = variant;
-    const webp_format = "data:image/webp";
-    const [img_format, img_data] = photo_src.split(";");
-    if (img_format === webp_format) return variant;
-
-    const buffer = Buffer.from(img_data.split(",")[1], "base64");
     try {
+      const { src } = variant;
+      const webp_format = "data:image/webp";
+      const [img_format, img_data] = src.split(";");
+      if (img_format === webp_format) return variant;
+  
+      const buffer = Buffer.from(img_data.split(",")[1], "base64");
       const converted_buffer = await sharp(buffer).webp().toBuffer();
       const converted_photo_src = `${webp_format};base64,${converted_buffer.toString("base64")}`;
       return {
         ...variant,
-        photo_src: converted_photo_src
+        src: converted_photo_src
       };
     } catch (error) {
       error_logger("convert_photos_to_webp", error);

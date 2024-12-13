@@ -148,7 +148,7 @@ export type T_Item_Body_Variant = {
   size_unit: T_Size_Unit;
   color_am: string;
   color_ru: string;
-  photo_src: string;
+  src: string;
 };
 
 export type T_Item_Body = {

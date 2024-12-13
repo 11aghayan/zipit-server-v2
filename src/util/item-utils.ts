@@ -79,7 +79,7 @@ export function check_description(description_am: string | null, description_ru:
 }
 
 export function check_photo(photo_src: string) {
-  if (!photo_src) return "Լուսանկարը տեղադրված չէ";
+  if (!photo_src) return "Լուսանկարը բացակայում է";
   if (typeof photo_src !== "string") return `typeof photo_src is ${typeof photo_src}`;
   if (photo_src.length < 20) return "Wrong photo data";
   return null; 
@@ -122,7 +122,7 @@ export async function create_item_variant(item_id: string, variant: T_Item_Body_
       VALUES($1, $2)
       RETURNING id;
     `,
-    [item_id, variant.photo_src]
+    [item_id, variant.src]
   )).rows[0].id as T_ID;
 
   const size_id = (await db.query(
@@ -188,7 +188,7 @@ export async function edit_item_variant(variant: T_Item_Body_Variant_Edit, db: P
       SET src = $1
       WHERE id = $2;
     `,
-    [variant.photo_src, variant.photo_id]
+    [variant.src, variant.photo_id]
   );
 
   await db.query(
