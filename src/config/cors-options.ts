@@ -1,8 +1,8 @@
 import cors from 'cors';
 
 export const allowed_origins = [
-  'http://localhost:3000',
-  'http://localhost:3000'
+  process.env.PUBLIC_URL as string,
+  process.env.ADMIN_URL as string
 ];
 
 export const public_cors = cors({
