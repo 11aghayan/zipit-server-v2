@@ -300,11 +300,9 @@ export async function add_item({ category_id, name_am, name_ru, variants }: T_It
       [category_id, name_am, name_ru]
     )).rows[0].id as T_ID;
 
-    const queries = variants.map((variant) => {
-      return create_item_variant(item_id, variant, db);
-    });
-    
-    await Promise.all(queries);
+    for (let variant of variants) {
+      await create_item_variant(item_id, variant, db);
+    }
     
     await db.query("COMMIT;");
 
