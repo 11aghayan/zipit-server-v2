@@ -78,10 +78,14 @@ export function check_description(description_am: string | null, description_ru:
   return null;
 }
 
-export function check_photo(photo_src: string) {
-  if (!photo_src) return "Լուսանկարը բացակայում է";
-  if (typeof photo_src !== "string") return `typeof photo_src is ${typeof photo_src}`;
-  if (photo_src.length < 20) return "Wrong photo data";
+export function check_photo(photo_src: string[]) {
+  if (!photo_src || photo_src.length < 1 || !Array.isArray(photo_src)) return "Լուսանկարը բացակայում է";
+  let index = 0;
+  for (let src of photo_src) {
+    if (typeof src !== "string") return `typeof photo_src is ${typeof photo_src}; index = ${index}`;
+    if (src.length < 20) return `Wrong photo data; index = ${index}`;
+    index++;
+  }
   return null; 
 }
 

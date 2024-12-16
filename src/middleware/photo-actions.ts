@@ -2,41 +2,43 @@ import sharp from "sharp";
 
 import * as Db from '../db';
 
-import { T_Controller, T_Item_Body } from "../types";
+import { T_Controller, T_Item_Body, T_Item_Body_Variant, T_Item_Body_Variant_Edit } from "../types";
 import { custom_error, error_logger, server_error } from "../util/error_handlers";
 
 export const convert_photos_to_webp: T_Controller = async function(req, res, next) {
-  const { variants: variants_full } = req.body as T_Item_Body;
+  try {
+    const { variants: variants_full } = req.body as T_Item_Body;
   
-  const variants = variants_full.filter(variant => !("delete" in variant));
+    const variants = variants_full.filter(variant => !("delete" in variant));
 
-  const converted_variants_promise = variants.map(async (variant) => {
-    try {
-      const { src } = variant;
-      const webp_format = "data:image/webp";
-      const [img_format, img_data] = src.split(";");
-      if (img_format === webp_format) return variant;
+    const converted_variants: (T_Item_Body_Variant | T_Item_Body_Variant_Edit)[] = [];
   
-      const buffer = Buffer.from(img_data.split(",")[1], "base64");
-      const converted_buffer = await sharp(buffer).webp().toBuffer();
-      const converted_photo_src = `${webp_format};base64,${converted_buffer.toString("base64")}`;
-      return {
+    for (let variant of variants) {
+      const src_list = variant.src;
+      const converted_src_list: string[] = [];
+      for (let src of src_list) {
+        const webp_format = "data:image/webp";
+        const [img_format, img_data] = src.split(";");
+        if (img_format === webp_format) return variant;
+    
+        const buffer = Buffer.from(img_data.split(",")[1], "base64");
+        const converted_buffer = await sharp(buffer).webp().toBuffer();
+        const converted_photo_src = `${webp_format};base64,${converted_buffer.toString("base64")}`;
+        converted_src_list.push(converted_photo_src);
+      }
+      converted_variants.push({
         ...variant,
-        src: converted_photo_src
-      };
-    } catch (error) {
-      error_logger("convert_photos_to_webp", error);
-      return null;
+        src: converted_src_list
+      });
     }
-  });
+    const delete_variants = variants_full.filter(variant => "delete" in variant);
 
-  const converted_variants = await Promise.all(converted_variants_promise);
-  if (converted_variants.includes(null)) return custom_error(res, 400, "Wrong image data");
-
-  const delete_variants = variants_full.filter(variant => "delete" in variant);
-
-  req.body.variants = [...delete_variants, ...converted_variants];
-  next();
+    req.body.variants = [...delete_variants, ...converted_variants];
+    next();
+  } catch (error) {
+    error_logger("convert_photos_to_webp", error);
+    return custom_error(res, 500, "Image conversion error");
+  }
 }
 
 export const get_photo_from_db: T_Controller = async function(req, res, next) {

@@ -30,7 +30,7 @@ export type T_Item = {
 export type T_Photo = {
   id: T_ID;
   item_id: T_ID;
-  src: string;
+  src: string[];
 };
 
 export type T_Size = {
@@ -148,7 +148,7 @@ export type T_Item_Body_Variant = {
   size_unit: T_Size_Unit;
   color_am: string;
   color_ru: string;
-  src: string;
+  src: string[];
 };
 
 export type T_Item_Body = {
