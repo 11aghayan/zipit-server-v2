@@ -72,3 +72,12 @@ export const get_suggestion_sorting: T_Controller = function(req, _res, next) {
   };
   next();
 }
+
+export const get_photo_src_index: T_Controller = function(req, _res, next) {
+  const { index } = req.query;
+  const num_index = Number(index);
+  if (!index || isNaN(num_index) || num_index < 1) {
+    req.query.index = "1"; 
+  }
+  next();
+}
