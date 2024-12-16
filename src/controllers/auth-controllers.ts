@@ -22,7 +22,7 @@ export const login: T_Controller = async function(req, res) {
 
 export const logout: T_Controller = async function(req, res) {
   const { jwt_token } = req.cookies;
-  if (jwt_token) res.clearCookie("jwt_token", { httpOnly: true, sameSite: "strict", secure: true });
+  if (jwt_token) res.clearCookie("jwt_token", { httpOnly: true, sameSite: "strict", secure: true, domain: process.env.COOKIE_DOMAIN as string });
   return res.sendStatus(200);
 }
 
