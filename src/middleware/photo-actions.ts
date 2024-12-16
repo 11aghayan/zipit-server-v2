@@ -8,9 +8,7 @@ import { custom_error, error_logger, server_error } from "../util/error_handlers
 export const convert_photos_to_webp: T_Controller = async function(req, res, next) {
   try {
     const { variants: variants_full } = req.body as T_Item_Body;
-  
     const variants = variants_full.filter(variant => !("delete" in variant));
-
     const converted_variants: (T_Item_Body_Variant | T_Item_Body_Variant_Edit)[] = [];
   
     for (let variant of variants) {
@@ -20,14 +18,13 @@ export const convert_photos_to_webp: T_Controller = async function(req, res, nex
         const webp_format = "data:image/webp";
         const [img_format, img_data] = src.split(";");
         if (img_format === webp_format) {
-          converted_variants.push(variant);
-          continue; 
+          converted_src_list.push(src);
+        } else {
+          const buffer = Buffer.from(img_data.split(",")[1], "base64");
+          const converted_buffer = await sharp(buffer).webp().toBuffer();
+          const converted_photo_src = `${webp_format};base64,${converted_buffer.toString("base64")}`;
+          converted_src_list.push(converted_photo_src);
         }
-    
-        const buffer = Buffer.from(img_data.split(",")[1], "base64");
-        const converted_buffer = await sharp(buffer).webp().toBuffer();
-        const converted_photo_src = `${webp_format};base64,${converted_buffer.toString("base64")}`;
-        converted_src_list.push(converted_photo_src);
       }
       converted_variants.push({
         ...variant,
