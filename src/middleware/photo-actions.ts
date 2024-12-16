@@ -19,7 +19,10 @@ export const convert_photos_to_webp: T_Controller = async function(req, res, nex
       for (let src of src_list) {
         const webp_format = "data:image/webp";
         const [img_format, img_data] = src.split(";");
-        if (img_format === webp_format) return variant;
+        if (img_format === webp_format) {
+          converted_variants.push(variant);
+          continue; 
+        }
     
         const buffer = Buffer.from(img_data.split(",")[1], "base64");
         const converted_buffer = await sharp(buffer).webp().toBuffer();
