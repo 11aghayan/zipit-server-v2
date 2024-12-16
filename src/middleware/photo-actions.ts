@@ -42,11 +42,11 @@ export const convert_photos_to_webp: T_Controller = async function(req, res, nex
 }
 
 export const get_photo_from_db: T_Controller = async function(req, res, next) {
-  const { width, height } = req.query;
+  const { width, height, index } = req.query;
   const { id } = req.params;
-  
+
   try {
-    const response = await Db.get_photo(id);
+    const response = await Db.get_photo(id, index as string);
     if (response instanceof Db.Db_Error_Response) {
       return custom_error(res, 500, "Photo fetching error");
     }
