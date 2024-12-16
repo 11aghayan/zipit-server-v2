@@ -8,5 +8,6 @@ declare namespace NodeJS {
     JWT_TOKEN_SECRET: string;
     ADMIN_URL: string;
     PUBLIC_URL: string;
+    COOKIE_DOMAIN: string;
   }
 }
