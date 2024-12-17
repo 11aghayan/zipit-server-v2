@@ -49,6 +49,7 @@ export const check_item_body: T_Controller = function(req, res, next) {
   
   if (!Array.isArray(variants)) return custom_error(res, 400, "variants is not iterable");
   if (variants.length < 1) return custom_error(res, 400, "Ապրանքը պետք է ունենա առնվազն մեկ տարբերակ");
+  if (variants.every(v => "delete" in v)) return custom_error(res, 400, "Ապրանքը պետք է ունենա առնվազն մեկ տարբերակ");
   
   let variant_index = 0;
   
