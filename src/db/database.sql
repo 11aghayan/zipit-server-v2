@@ -10,7 +10,7 @@ CREATE DOMAIN SIZE_UNIT AS VARCHAR(3)
   CHECK(value ~ '^mm$|^cm$|^m$');
 
 CREATE DOMAIN MIN_ORDER_UNIT AS VARCHAR(5)
-  CHECK(value ~ '^pcs$|^cm$|^box$|^roll$');
+  CHECK(value ~ '^pcs$|^cm$|^box$|^roll$|^m$');
 
 CREATE DOMAIN SPECIAL_GROUP AS CHAR(3)
   CHECK(value ~ '^new$|^prm$|^liq$');
@@ -41,7 +41,7 @@ CREATE TABLE item_tbl (
 CREATE TABLE item_photo_tbl (
   id ID PRIMARY KEY,
   item_id UUID NOT NULL,
-  src TEXT NOT NULL,
+  src TEXT[] NOT NULL,
 
   CONSTRAINT fk_item
     FOREIGN KEY(item_id)
@@ -52,7 +52,7 @@ CREATE TABLE item_photo_tbl (
 CREATE TABLE item_size_tbl (
   id ID PRIMARY KEY,
   item_id UUID NOT NULL,
-  size_value INT NOT NULL,
+  size_value NUMERIC NOT NULL,
   size_unit SIZE_UNIT NOT NULL,
 
   CONSTRAINT fk_item
@@ -76,16 +76,16 @@ CREATE TABLE item_color_tbl (
 CREATE TABLE item_info_tbl (
   item_id UUID NOT NULL,
   photo_id UUID NOT NULL,
-  price INT NOT NULL,
-  promo INT,
+  price NUMERIC NOT NULL,
+  promo NUMERIC,
   size_id UUID NOT NULL,
   color_id UUID NOT NULL,
-  min_order_value INT NOT NULL,
+  min_order_value NUMERIC NOT NULL,
   min_order_unit MIN_ORDER_UNIT NOT NULL,
   description_am TEXT,
   description_ru TEXT,
   special_group SPECIAL_GROUP,
-  available INT DEFAULT 1 NOT NULL,
+  available NUMERIC DEFAULT 1 NOT NULL,
   creation_date BIGINT DEFAULT trunc(extract(epoch from now() )*1000) NOT NULL,
 
   CONSTRAINT fk_item

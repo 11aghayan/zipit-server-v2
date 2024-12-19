@@ -2,7 +2,7 @@ import { Pool } from "pg";
 import { T_ID, T_Item_Body_Variant, T_Item_Body_Variant_Delete, T_Item_Body_Variant_Edit, T_Min_Order_Unit, T_Size_Unit, T_Special_Group } from "../types";
 
 const valid_size_units: T_Size_Unit[] = ["mm", "cm", "m"];
-const valid_min_order_units: T_Min_Order_Unit[] = ["box", "cm", "pcs", "roll"];
+const valid_min_order_units: T_Min_Order_Unit[] = ["box", "cm", "pcs", "roll", "m"];
 const valid_special_group: (T_Special_Group | null)[] = ["new", "prm", "liq", null];
 
 export function check_category(category_id: T_ID) {
@@ -24,7 +24,7 @@ export function check_name(name_am: string, name_ru: string) {
 }
 
 export function check_price(price: number) {
-  if (!price) return "Գինը նշված չէ";
+  if (price === undefined) return "Գինը նշված չէ";
   if (typeof price !== "number") return `typeof price is ${typeof price}`;
   if (price <= 0) return "Գինը պետք է լինի 0-ից մեծ արժեք";
 
@@ -41,9 +41,9 @@ export function check_promo(promo: number | null) {
 }
 
 export function check_size(size_value: number, size_unit: T_Size_Unit) {
-  if (!size_value) return "Չափի արժեքը նշված չէ";
+  if (size_value === undefined) return "Չափի արժեքը նշված չէ";
   if (typeof size_value !== "number") return `typeof size_value is ${typeof size_value}`;
-  if (size_value <= 0) return "Չափի արժեքը պետք է լինի 0-ից մեծ արժեք";
+  if (size_value < 0) return "Չափի արժեքը պետք է լինի 0 և մեծ արժեք";
   if (!size_unit) return "Չափի միավորը նշված չէ";
   if (typeof size_unit !== "string") return `typeof size_unit is ${typeof size_unit}`;
   if (!valid_size_units.includes(size_unit)) return `invalid size_unit: ${size_unit}`;
@@ -63,7 +63,7 @@ export function check_color(color_am: string, color_ru: string) {
 }
 
 export function check_min_order(min_order_value: number, min_order_unit: T_Min_Order_Unit) {
-  if (!min_order_value) return "Նվազագույն պատվերի արժեքը նշված չէ";
+  if (min_order_value === undefined) return "Նվազագույն պատվերի արժեքը նշված չէ";
   if (typeof min_order_value !== "number") return `typeof min_order_value is ${typeof min_order_value}`;
   if (min_order_value <= 0) return "Նվազագույն պատվերի արժեքը պետք է լինի 0-ից մեծ արժեք";
   if (!min_order_unit) return "Նվազագույն պատվերի միավորը նշված չէ";
