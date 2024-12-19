@@ -27,9 +27,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.6",
     "express": "^4.21.1",
+    "express-rate-limit": "^7.4.1",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.1",
-    "sharp": "^0.33.5",
-    "zipit-server-v2": "link:"
+    "sharp": "^0.33.5"
   }
 }
