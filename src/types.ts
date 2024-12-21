@@ -73,14 +73,14 @@ export type T_Filters = {
 
 export type T_Item_Public_Short = {
   id: T_ID;
-  name_ru: string;
+  name: string;
   photo_id: T_ID;
   price: number;
   promo: number | null;
   special_group: T_Special_Group | null;
   size_value: number;
   size_unit: T_Size_Unit;
-  color_ru: string;
+  color: string;
   count: string;
 };
 
