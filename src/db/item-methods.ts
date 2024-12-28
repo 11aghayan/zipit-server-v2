@@ -1,5 +1,18 @@
 import { db, Db_Error_Response, Db_Success_Response } from ".";
-import { T_Filters, T_Item_Public_Full, T_Item_Public_Short, T_Lang, T_ID, T_Special_Group, T_Size_Unit, T_Item_Admin_Short, T_Item_Admin_Full, T_Item_Body, T_Item_Body_Edit, T_Item_Body_Variant, T_Item_Body_Variant_Edit } from "../types";
+import { 
+  T_Filters, 
+  T_Item_Public_Full, 
+  T_Item_Public_Short, 
+  T_Lang, 
+  T_ID, 
+  T_Special_Group, 
+  T_Size_Unit, 
+  T_Item_Admin_Short, 
+  T_Item_Admin_Full, 
+  T_Item_Body, 
+  T_Item_Body_Edit, 
+  T_Item_Body_Variant_Edit,
+  T_Cart_Item_Request} from "../types";
 import { error_logger } from "../util/error_handlers";
 import { remove_duplicates, short_items_keys } from "../util/db-utils";
 import { create_item_variant, delete_item_variant, edit_item_variant } from "../util/item-utils";
@@ -18,6 +31,8 @@ export async function get_all_items_public({ categories, special_groups, count, 
           size_value,
           size_unit,
           color_${lang} as color,
+          min_order_value,
+          min_order_unit,
           count
         FROM (
           SELECT 
@@ -81,17 +96,20 @@ export async function get_item_public(id: string, lang: T_Lang) {
           min_order_unit,
           description_${lang} as description,
           special_group,
-          available
+          available,
+          array_length(src, 1) as photo_count
         FROM item_tbl
         LEFT JOIN item_info_tbl
-        ON item_tbl.id = item_info_tbl.item_id
+          ON item_tbl.id = item_info_tbl.item_id
         LEFT JOIN item_size_tbl
-        ON item_info_tbl.size_id = item_size_tbl.id
+          ON item_info_tbl.size_id = item_size_tbl.id
         LEFT JOIN item_color_tbl
-        ON item_info_tbl.color_id = item_color_tbl.id 
+          ON item_info_tbl.color_id = item_color_tbl.id 
+        LEFT JOIN item_photo_tbl
+          ON item_photo_tbl.id = item_info_tbl.photo_id
         LEFT JOIN category_tbl
-        ON item_tbl.category_id = category_tbl.id
-        WHERE item_tbl.id = $1;
+          ON item_tbl.category_id = category_tbl.id
+        WHERE item_tbl.id = $1
       `,
       [id]
     );
@@ -103,7 +121,7 @@ export async function get_item_public(id: string, lang: T_Lang) {
   }
 }
 
-export async function get_similar_items(category_id: T_ID, special_group: T_Special_Group | null, size_unit: T_Size_Unit, count: number, lang: T_Lang) {
+export async function get_similar_items(item_id: T_ID, category_id: T_ID, special_group: T_Special_Group | null, size_unit: T_Size_Unit, count: number, lang: T_Lang) {
   try {
     let rows: T_Item_Public_Short[] = [];
     
@@ -117,13 +135,13 @@ export async function get_similar_items(category_id: T_ID, special_group: T_Spec
         ON item_info_tbl.size_id = item_size_tbl.id
         LEFT JOIN item_color_tbl
         ON item_info_tbl.color_id = item_color_tbl.id
-        WHERE category_id = $1
+        WHERE category_id = $1 AND item_tbl.id != $3
         LIMIT $2;
       `,
-      [category_id, count]
+      [category_id, count, item_id]
     );
 
-    rows = [...rows_1];
+    rows = remove_duplicates(rows_1);
     
     if (rows.length < count && special_group) {
       const { rows: rows_2 } = await db.query(
@@ -136,16 +154,15 @@ export async function get_similar_items(category_id: T_ID, special_group: T_Spec
           ON item_info_tbl.size_id = item_size_tbl.id
           LEFT JOIN item_color_tbl
           ON item_info_tbl.color_id = item_color_tbl.id
-          WHERE special_group = $1
+          WHERE special_group = $1 AND item_tbl.id != $3
           LIMIT $2;
         `,
-        [special_group, count - rows.length]
+        [special_group, count - rows.length, item_id]
       );
 
-      rows = [...rows, ...rows_2];
+      rows = remove_duplicates([...rows, ...rows_2]);
     }
 
-    rows = remove_duplicates(rows);
     
     if (rows.length < count) {
       const { rows: rows_2 } = await db.query(
@@ -158,16 +175,15 @@ export async function get_similar_items(category_id: T_ID, special_group: T_Spec
           ON item_info_tbl.size_id = item_size_tbl.id
           LEFT JOIN item_color_tbl
           ON item_info_tbl.color_id = item_color_tbl.id
-          WHERE size_unit = $1
+          WHERE size_unit = $1 AND item_tbl.id != $3
           LIMIT $2;
         `,
-        [size_unit, count - rows.length]
+        [size_unit, count - rows.length, item_id]
       );
 
-      rows = [...rows, ...rows_2];
+      rows = remove_duplicates([...rows, ...rows_2]);
     }
     
-    rows = remove_duplicates(rows);
     
     if (rows.length < count) {
       const { rows: rows_2 } = await db.query(
@@ -180,6 +196,7 @@ export async function get_similar_items(category_id: T_ID, special_group: T_Spec
           ON item_info_tbl.size_id = item_size_tbl.id
           LEFT JOIN item_color_tbl
           ON item_info_tbl.color_id = item_color_tbl.id
+          WHERE item_tbl.id != $2
           ORDER BY 
             CASE special_group
                 WHEN 'liq' THEN 1
@@ -189,16 +206,83 @@ export async function get_similar_items(category_id: T_ID, special_group: T_Spec
             END
           LIMIT $1;
         `,
-        [count - rows.length]
+        [count - rows.length, item_id]
       );
-
-      rows = [...rows, ...rows_2];
+      rows = remove_duplicates([...rows, ...rows_2]);
     }
     
-    rows = remove_duplicates(rows);
     return new Db_Success_Response(rows);
   } catch (error) {
     error_logger("db -> item-methods -> get_similar_items\n", error);
+    return new Db_Error_Response(error);
+  }
+}
+
+export async function get_cart_items(items: T_Cart_Item_Request[], lang: T_Lang) {
+  try {
+    const { rows } = await db.query(
+      `
+        SELECT 
+          i_id as id, 
+          name_${lang} as name,
+          photo_id,
+          price,
+          promo,
+          special_group,
+          size_value,
+          size_unit,
+          color_${lang} as color,
+          min_order_value,
+          min_order_unit,
+          count
+        FROM (
+          SELECT 
+            *,
+            item_tbl.id as i_id,
+            COUNT(*) OVER()
+          FROM item_tbl
+          LEFT JOIN item_info_tbl
+            ON item_tbl.id = item_info_tbl.item_id
+          LEFT JOIN item_size_tbl
+            ON item_info_tbl.size_id = item_size_tbl.id
+          LEFT JOIN item_color_tbl
+            ON item_info_tbl.color_id = item_color_tbl.id
+          WHERE item_tbl.id = ANY($1::uuid[])
+        );
+      `
+      , 
+      [items.map(i => i.item_id)]
+    ) as { rows: T_Item_Public_Short[] };
+
+    const filtered_rows = rows.filter(i => items.some(item => item.photo_id === i.photo_id));
+    
+    return new Db_Success_Response<T_Item_Public_Short>(filtered_rows);
+  } catch (error) {
+    error_logger("db -> item-methods -> get_cart_items\n", error);
+    return new Db_Error_Response(error);
+  }
+}
+
+export async function get_items_by_photo_ids(photo_ids: T_ID[]) {
+  try {
+    const { rows } = await db.query(
+      `
+        SELECT *
+          FROM item_info_tbl
+        LEFT JOIN item_tbl
+          ON item_info_tbl.item_id = item_tbl.id 
+        LEFT JOIN item_size_tbl
+          ON item_info_tbl.size_id = item_size_tbl.id
+        LEFT JOIN item_color_tbl
+          ON item_info_tbl.color_id = item_color_tbl.id
+        WHERE item_info_tbl.photo_id = ANY($1::uuid[]);
+      `,
+      [photo_ids]
+    );
+
+    return new Db_Success_Response<T_Item_Admin_Full>(rows);
+  } catch (error) {
+    error_logger("db -> item-methods -> get_items_by_photo_id\n", error);
     return new Db_Error_Response(error);
   }
 }

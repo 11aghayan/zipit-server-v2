@@ -9,7 +9,9 @@ import {
   add_item,
   edit_item,
   delete_item,
-  get_matching_items
+  get_matching_items,
+  get_cart_items,
+  get_items_by_photo_ids
 } from './item-methods';
 
 import { get_photo } from './photo-methods';
@@ -80,5 +82,7 @@ export {
   edit_category,
   delete_category,
   get_credentials,
-  change_user_password
+  change_user_password,
+  get_cart_items,
+  get_items_by_photo_ids
 };

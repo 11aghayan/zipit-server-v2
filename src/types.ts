@@ -82,6 +82,8 @@ export type T_Item_Public_Short = {
   size_unit: T_Size_Unit;
   color: string;
   count: string;
+  min_order_value: number;
+  min_order_unit: T_Min_Order_Unit;
 };
 
 export type T_Item_Public_Common = {
@@ -107,7 +109,7 @@ export type T_Item_Public_Variant = {
   available: number;
 };
 
-export type T_Item_Public_Full = T_Item_Public_Common & T_Item_Public_Variant;
+export type T_Item_Public_Full = T_Item_Public_Common & T_Item_Public_Variant & { photo_count: number };
 
 export type T_Item_Public_Full_Response = T_Item_Public_Common & {
   variants: T_Item_Public_Variant[];
@@ -187,3 +189,8 @@ export type T_Category_Response_Public = {
   label: string;
   item_count: number;
 };
+
+export type T_Cart_Item_Request = {
+  item_id: T_ID;
+  photo_id: T_ID;
+}

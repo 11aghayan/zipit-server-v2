@@ -1,5 +1,5 @@
 import * as Db from "../db";
-import { T_Controller, T_Filters, T_ID, T_Item_Admin_Common, T_Item_Admin_Full, T_Item_Admin_Full_Response, T_Item_Body, T_Item_Body_Edit, T_Item_Public_Common, T_Item_Public_Full, T_Item_Public_Full_Response, T_Lang, T_Size_Unit, T_Special_Group } from "../types";
+import { T_Cart_Item_Request, T_Controller, T_Filters, T_ID, T_Item_Admin_Common, T_Item_Admin_Full, T_Item_Admin_Full_Response, T_Item_Body, T_Item_Body_Edit, T_Item_Public_Common, T_Item_Public_Full, T_Item_Public_Full_Response, T_Lang, T_Size_Unit, T_Special_Group } from "../types";
 import { custom_error, server_error } from "../util/error_handlers";
 
 export const get_all_items_public: T_Controller = async function(req, res) {
@@ -51,18 +51,19 @@ export const get_item_public: T_Controller = async function(req, res) {
 }
 
 export const get_similar_items: T_Controller = async function(req, res) {
-  const { category_id, special_group = null, size_unit } = req.query as { category_id: T_ID, special_group: T_Special_Group | null, size_unit: T_Size_Unit };
-  const lang = req.query.lang as T_Lang;
+  let { item_id, category_id, special_group = null, size_unit, lang } = req.query as { category_id: T_ID, special_group: string | undefined, size_unit: T_Size_Unit, item_id: T_ID, lang: T_Lang };
+  if (!item_id) return custom_error(res, 400, "No Item ID");
   if (!category_id) return custom_error(res, 400, "No category ID");
   if (!size_unit) return custom_error(res, 400, "No size unit");
-
+  special_group = special_group === "null" || special_group === "undefined" ? null : special_group;
+  
   try {
-    const items = await Db.get_similar_items(category_id, special_group, size_unit, 10, lang);
+    const items = await Db.get_similar_items(item_id, category_id, special_group as T_Special_Group, size_unit, 10, lang);
     if (items instanceof Db.Db_Error_Response) {
       return custom_error(res, 500, "Item fetching error");
     }
 
-    return res.status(200).json({ length: items.rows.length, items: items.rows });
+    return res.status(200).json({ items_count: items.rows.length, items: items.rows });
   } catch (error) {
     return server_error(res, "get_similar_items", error);
   }
@@ -177,3 +178,19 @@ export const get_matching_items: T_Controller = async function(req, res) {
     return server_error(res, "get_matching_items", error);
   }
 }
+
+export const get_cart_items: T_Controller = async function(req, res) {
+  const { lang } = req.query;
+  const { items } = req.body as { items: T_Cart_Item_Request[] };
+  
+  try {
+    const response = await Db.get_cart_items(items, lang as T_Lang);
+    if (response instanceof Db.Db_Error_Response) {
+      return custom_error(res, 500, "Items fetching error");
+    }
+    return res.status(200).json({ items_count: response.rows.length, pages: 1, items: response.rows });
+  } catch (error) {
+    return server_error(res, "get_cart_items", error);
+  }
+}
+

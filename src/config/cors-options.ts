@@ -7,7 +7,7 @@ export const allowed_origins = [
 
 export const public_cors = cors({
   origin: [allowed_origins[0]],
-  methods: ['GET'],
+  methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization']
 });
 

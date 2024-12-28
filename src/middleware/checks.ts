@@ -1,4 +1,4 @@
-import { T_Controller, T_Item_Body, T_Item_Body_Edit } from "../types";
+import { T_Cart_Item_Request, T_Controller, T_ID, T_Item_Body } from "../types";
 import { custom_error } from "../util/error_handlers";
 import { 
   check_available, 
@@ -192,5 +192,28 @@ export const check_new_password: T_Controller = function(req, res, next) {
     return custom_error(res, 400, "Գաղտնաբառը պետք է ունենա առնվազն 8 և առավելագույնը 32 նիշ երկարություն և պարունակի հետևյալ նիշերից յուրաքանչյուրը. մեծատառ տառ, փոքրատառ տառ, թվանշան, հատուկ նշան (!,@,#,$,%,^,&,*,(,),?,>,<,-,_,{,})");
   }
 
+  next();
+}
+
+export const check_cart_items_body: T_Controller = function(req, res, next) {
+  const { items } = req.body as { items: T_Cart_Item_Request[] };
+  if (!items || !Array.isArray(items)) return custom_error(res, 400 , "No items or items is not iterable");
+
+  for (let item of items) {
+    if (!item.item_id) return custom_error(res, 400, "No Item ID");
+    if (!item.photo_id) return custom_error(res, 400, "No Photo ID");
+  }
+  
+  next();
+}
+
+export const check_order: T_Controller = function(req, res, next) {
+  const { name, address, phone, comment, order } = req.body;
+  if (!name || name.length < 1 || typeof name !== "string" || name.length > 50) return custom_error(res, 400, "Name error");
+  if (!address || address.length < 1 || typeof address !== "string" || address.length > 50) return custom_error(res, 400, "Address error");
+  if (!phone || phone.length < 1 || typeof phone !== "string" || phone.length > 50) return custom_error(res, 400, "Phone error");
+  if (typeof comment !== "string" || comment.length > 300) return custom_error(res, 400, "Comment error");
+
+  if (typeof order !== "object" || Object.keys(order).length < 1) return custom_error(res, 400, "Order error");
   next();
 }

@@ -58,10 +58,10 @@ export const get_user_sorting: T_Controller = function(req, res, next) {
 export const get_suggestion_sorting: T_Controller = function(req, _res, next) {
   req.body.sorting = `
     CASE special_group
-        WHEN 'liq' THEN 1
-        WHEN 'promo' THEN 2
-        WHEN 'new' THEN 3
-        ELSE 4
+      WHEN 'liq' THEN 1
+      WHEN 'promo' THEN 2
+      WHEN 'new' THEN 3
+      ELSE 4
     END
   `;
   req.body.filters = {
