@@ -6,12 +6,11 @@ import { custom_error, server_error } from "../util/error_handlers";
 import { generate_email_message } from "../util/order-utils";
 
 const transporter = createTransport({
-  service: 'gmail',
-  host: 'smtp.gmail.com',
+  host: "smtp.yandex.com",
   port: 465,
   secure: true,
   auth: {
-    user: "zipit.sender@gmail.com",
+    user: process.env.NODEMAILER_USER as string,
     pass: process.env.NODEMAILER_PASSWORD as string
   }
 });
@@ -24,7 +23,7 @@ export const confirm_order: T_Controller = async function(req, res) {
       return custom_error(res, 500, "db_error");
     }
     const email_message = generate_email_message({ ...req.body, items: items.rows });
-    transporter.sendMail(email_message);
+    await transporter.sendMail(email_message);
 
     return res.status(200).json({ ok: true });
   } catch (error) {

@@ -12,7 +12,7 @@ type Props = {
 export function generate_email_message({ name, address, phone, comment, order, items }: Props) {
 
   return {
-    from: "zipit.sender@gmail.com",
+    from: process.env.NODEMAILER_USER,
     to: process.env.TO_EMAIL as string,
     subject: "Նոր պատվեր",
     html: `
