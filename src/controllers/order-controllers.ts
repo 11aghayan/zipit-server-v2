@@ -5,12 +5,11 @@ import { T_Controller } from "../types";
 import { custom_error, server_error } from "../util/error_handlers";
 import { generate_email_message } from "../util/order-utils";
 
-const { 
-  NODEMAILER_PASSWORD
-} = process.env as { [key: string]: string };
-
 const transporter = createTransport({
-  service: "gmail",
+  service: "Gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
     user: "zipit.sender@gmail.com",
     pass: process.env.NODEMAILER_PASSWORD as string
