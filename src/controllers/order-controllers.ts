@@ -8,9 +8,6 @@ import { generate_email_message } from "../util/order-utils";
 const transporter = createTransport({
   service: 'gmail',
   host: 'smtp.gmail.com',
-  tls: {
-      ciphers: "SSLv3",
-  },
   port: 465,
   secure: true,
   auth: {
