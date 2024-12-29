@@ -13,7 +13,7 @@ export function generate_email_message({ name, address, phone, comment, order, i
 
   return {
     from: "zipit.sender@gmail.com",
-    to: "11.aghayan.06@gmail.com",
+    to: process.env.TO_EMAIL as string,
     subject: "Նոր պատվեր",
     html: `
       <div>

@@ -10,5 +10,6 @@ declare namespace NodeJS {
     PUBLIC_URL: string;
     COOKIE_DOMAIN: string;
     NODEMAILER_PASSWORD: string;
+    TO_EMAIL: string;
   }
 }
