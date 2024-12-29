@@ -11,8 +11,8 @@ const transporter = createTransport({
   tls: {
       ciphers: "SSLv3",
   },
-  port: 587,
-  secure: false,
+  port: 465,
+  secure: true,
   auth: {
     user: "zipit.sender@gmail.com",
     pass: process.env.NODEMAILER_PASSWORD as string
