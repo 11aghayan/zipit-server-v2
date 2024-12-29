@@ -6,10 +6,13 @@ import { custom_error, server_error } from "../util/error_handlers";
 import { generate_email_message } from "../util/order-utils";
 
 const transporter = createTransport({
-  service: "Gmail",
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  service: 'gmail',
+  host: 'smtp.gmail.com',
+  tls: {
+      ciphers: "SSLv3",
+  },
+  port: 587,
+  secure: false,
   auth: {
     user: "zipit.sender@gmail.com",
     pass: process.env.NODEMAILER_PASSWORD as string
