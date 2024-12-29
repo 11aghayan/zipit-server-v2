@@ -6,8 +6,8 @@ import { custom_error, server_error } from "../util/error_handlers";
 import { generate_email_message } from "../util/order-utils";
 
 const transporter = createTransport({
-  host: "smtp.yandex.com",
-  port: 465,
+  host: process.env.NODEMAILER_HOST as string,
+  port: Number(process.env.NODEMAILER_PORT as string),
   secure: true,
   auth: {
     user: process.env.NODEMAILER_USER as string,

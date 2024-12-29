@@ -11,6 +11,8 @@ declare namespace NodeJS {
     COOKIE_DOMAIN: string;
     NODEMAILER_USER: string;
     NODEMAILER_PASSWORD: string;
+    NODEMAILER_HOST: string;
+    NODEMAILER_PORT: string;
     TO_EMAIL: string;
   }
 }
