@@ -8,7 +8,7 @@ import { generate_email_message } from "../util/order-utils";
 const transporter = createTransport({
   host: process.env.NODEMAILER_HOST as string,
   port: Number(process.env.NODEMAILER_PORT as string),
-  secure: true,
+  secure: !!Number(process.env.NODEMAILER_SECURE),
   auth: {
     user: process.env.NODEMAILER_USER as string,
     pass: process.env.NODEMAILER_PASSWORD as string
