@@ -2,11 +2,14 @@ import { NextFunction, Request, Response } from 'express';
 
 import { admin_cors, allowed_origins, public_cors } from '../config/cors-options';
 
+const public_url_list = JSON.parse(process.env.PUBLIC_URL_LIST as string);
+const admin_url_list = JSON.parse(process.env.ADMIN_URL_LIST as string);
+
 export function cors(req: Request, res: Response, next: NextFunction) {
   const origin = req.get('origin');
-  if (origin === process.env.ADMIN_URL as string) {
+  if (admin_url_list.includes(origin)) {
     admin_cors(req, res, next);
-  } else if (origin === process.env.PUBLIC_URL as string) {
+  } else if (public_url_list.includes(origin)) {
     public_cors(req, res, next);
   } else {
     next();
@@ -16,7 +19,7 @@ export function cors(req: Request, res: Response, next: NextFunction) {
 export function credentials(req: Request, res: Response, next: NextFunction) {
   const { origin } = req.headers;
   
-  if (origin && allowed_origins.includes(origin)) {
+  if (origin && allowed_origins.some(allowed_origin => allowed_origin.includes(origin))) {
     res.header('Access-Control-Allow-Credentials', 'true');
   }
   next();

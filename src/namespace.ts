@@ -6,8 +6,8 @@ declare namespace NodeJS {
     PG_DATABASE: string;
     PG_PASSWORD: string;
     JWT_TOKEN_SECRET: string;
-    ADMIN_URL: string;
-    PUBLIC_URL: string;
+    ADMIN_URL_LIST: string;
+    PUBLIC_URL_LIST: string;
     COOKIE_DOMAIN: string;
     NODEMAILER_USER: string;
     NODEMAILER_PASSWORD: string;
