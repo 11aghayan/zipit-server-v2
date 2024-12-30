@@ -12,7 +12,8 @@ const transporter = createTransport({
   auth: {
     user: process.env.NODEMAILER_USER as string,
     pass: process.env.NODEMAILER_PASSWORD as string
-  }
+  },
+  debug: true
 });
 
 export const confirm_order: T_Controller = async function(req, res) {
@@ -23,8 +24,13 @@ export const confirm_order: T_Controller = async function(req, res) {
       return custom_error(res, 500, "db_error");
     }
     const email_message = generate_email_message({ ...req.body, items: items.rows });
-    await transporter.sendMail(email_message);
-
+    const mail_res = await transporter.sendMail(email_message);
+    console.log(mail_res);
+    if (mail_res.rejected.length > 0) {
+      return custom_error(res, 500, "Order error");
+    }
+    
+    console.log(mail_res);
     return res.status(200).json({ ok: true });
   } catch (error) {
     return server_error(res, "confirm_order", error);
