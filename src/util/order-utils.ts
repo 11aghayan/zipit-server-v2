@@ -12,10 +12,8 @@ type Props = {
 export function generate_email_message({ name, address, phone, comment, order, items }: Props) {
 
   return {
-    from: process.env.NODEMAILER_USER,
-    to: process.env.TO_EMAIL as string,
-    subject: "Նոր պատվեր",
-    html: `
+    subject: "ZIPIT Նոր պատվեր",
+    message: `
       <div>
         <p>Պատվիրողի անունը: ${name}</p>
         <p>Պատվիրողի հեռախոսահամարը: ${phone}</p>

@@ -9,11 +9,8 @@ declare namespace NodeJS {
     ADMIN_URL_LIST: string;
     PUBLIC_URL_LIST: string;
     COOKIE_DOMAIN: string;
-    NODEMAILER_USER: string;
-    NODEMAILER_PASSWORD: string;
-    NODEMAILER_SECURE: string;
-    NODEMAILER_HOST: string;
-    NODEMAILER_PORT: string;
+    MAILJET_API_KEY: string;
+    MAILJET_SECRET_KEY: string;
     TO_EMAIL: string;
   }
 }
