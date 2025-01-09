@@ -19,9 +19,11 @@ export async function get_categories_admin() {
     );
     
     const other = rows.find(r => r.label_am === "Այլ" || r.label_ru === "Прочие");
-    const filtered_rows = rows.filter(r => r.id !== other.id);
+    const filtered_rows = rows.filter(r => r.id !== other?.id);
     
-    filtered_rows.push(other);
+    if (other) {
+      filtered_rows.push(other);
+    }
     
     return new Db_Success_Response<T_Category_Response_Admin>(filtered_rows);
   } catch (error) {

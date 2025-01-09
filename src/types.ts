@@ -4,7 +4,7 @@ export type T_ID = string;
 
 export type T_Controller = (req: Request, res: Response, next: NextFunction) => any;
 export type T_Lang = 'am' | 'ru';
-export type T_Size_Unit = "mm" | "cm" | "m";
+export type T_Size_Unit = "mm" | "cm" | "m" | "num";
 export type T_Min_Order_Unit = "pcs" | "cm" | "box" | "roll" | "m";
 export type T_Special_Group = "new" | "prm" | "liq";
 

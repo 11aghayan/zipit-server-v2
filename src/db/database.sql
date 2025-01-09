@@ -7,7 +7,7 @@ CREATE DOMAIN ID AS UUID
   DEFAULT uuid_generate_v4() NOT NULL;
 
 CREATE DOMAIN SIZE_UNIT AS VARCHAR(3)
-  CHECK(value ~ '^mm$|^cm$|^m$');
+  CHECK(value ~ '^mm$|^cm$|^m$|^num');
 
 CREATE DOMAIN MIN_ORDER_UNIT AS VARCHAR(5)
   CHECK(value ~ '^pcs$|^cm$|^box$|^roll$|^m$');

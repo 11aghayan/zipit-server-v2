@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import { T_ID, T_Item_Body_Variant, T_Item_Body_Variant_Delete, T_Item_Body_Variant_Edit, T_Min_Order_Unit, T_Size_Unit, T_Special_Group } from "../types";
 
-const valid_size_units: T_Size_Unit[] = ["mm", "cm", "m"];
+const valid_size_units: T_Size_Unit[] = ["mm", "cm", "m", "num"];
 const valid_min_order_units: T_Min_Order_Unit[] = ["box", "cm", "pcs", "roll", "m"];
 const valid_special_group: (T_Special_Group | null)[] = ["new", "prm", "liq", null];
 
