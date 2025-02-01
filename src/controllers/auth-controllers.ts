@@ -13,7 +13,7 @@ export const login: T_Controller = async function(req, res) {
 
   try {
     const jwt_token = jwt.sign({ username }, JWT_TOKEN_SECRET, { expiresIn: "3h" });
-    res.cookie('jwt_token', jwt_token, { httpOnly: true, sameSite: "strict", maxAge: COOKIE_MAX_AGE, secure: false, domain: process.env.COOKIE_DOMAIN as string });
+    res.cookie('jwt_token', jwt_token, { httpOnly: true, sameSite: "strict", maxAge: COOKIE_MAX_AGE, secure: true, domain: process.env.COOKIE_DOMAIN as string });
     return res.sendStatus(200);
   } catch (error) {
     return server_error(res, "login", error);
