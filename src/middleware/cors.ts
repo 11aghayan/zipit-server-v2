@@ -2,11 +2,11 @@ import { NextFunction, Request, Response } from 'express';
 
 import { admin_cors, allowed_origins, public_cors } from '../config/cors-options';
 
-const public_url_list = JSON.parse(process.env.PUBLIC_URL_LIST as string);
-const admin_url_list = JSON.parse(process.env.ADMIN_URL_LIST as string);
+const public_url_list =(process.env.PUBLIC_URL_LIST as string).split(",");
+const admin_url_list = (process.env.ADMIN_URL_LIST as string).split(",");
 
 export function cors(req: Request, res: Response, next: NextFunction) {
-  const origin = req.get('origin');
+  const origin = req.get('origin') ?? "";
   if (admin_url_list.includes(origin)) {
     admin_cors(req, res, next);
   } else if (public_url_list.includes(origin)) {
