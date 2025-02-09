@@ -1,6 +1,8 @@
 import { T_ID, T_Lang } from "../types";
 
 export function short_items_keys(lang: T_Lang) {
+  lang = lang !== "am" && lang !== "ru" ? "am" : lang;
+  
   return `
     item_tbl.id, 
     name_${lang} as name,
