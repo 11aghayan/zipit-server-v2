@@ -1,8 +1,8 @@
 import cors from 'cors';
 
 export const allowed_origins = [
-  (process.env.PUBLIC_URL_LIST as string).split(","),
-  (process.env.ADMIN_URL_LIST as string).split(",")
+  (process.env.PUBLIC_URL_LIST as string).split(",").map(url => url.trim()),
+  (process.env.ADMIN_URL_LIST as string).split(",").map(url => url.trim())
 ];
 
 export const public_cors = cors({
