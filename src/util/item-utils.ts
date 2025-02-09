@@ -24,16 +24,15 @@ export function check_name(name_am: string, name_ru: string) {
 }
 
 export function check_price(price: number) {
-  if (price === undefined) return "Գինը նշված չէ";
-  if (typeof price !== "number") return `typeof price is ${typeof price}`;
+  if (typeof price !== "number" || isNaN(price)) return `typeof price is ${isNaN(price) ? "NaN" : typeof price}`;
   if (price <= 0) return "Գինը պետք է լինի 0-ից մեծ արժեք";
 
   return null;
 }
 
 export function check_promo(promo: number | null) {
-  if (typeof promo !== "number") {
-    if (promo !== null) return `typeof promo is ${typeof promo}`;
+  if (typeof promo !== "number" || isNaN(promo)) {
+    if (promo !== null) return `typeof promo is ${isNaN(promo) ? "NaN" : typeof promo}`;
     return null;
   }
   if (promo <= 0) return "Ակցիան կամ պետք է լինի անջատված կամ 0-ից մեծ արժեք";
@@ -41,10 +40,8 @@ export function check_promo(promo: number | null) {
 }
 
 export function check_size(size_value: number, size_unit: T_Size_Unit) {
-  if (size_value === undefined) return "Չափի արժեքը նշված չէ";
-  if (typeof size_value !== "number") return `typeof size_value is ${typeof size_value}`;
+  if (typeof size_value !== "number" || isNaN(size_value)) return `typeof size_value is ${isNaN(size_value) ? "NaN" : typeof size_value}`;
   if (size_value < 0) return "Չափի արժեքը պետք է լինի 0 և մեծ արժեք";
-  if (!size_unit) return "Չափի միավորը նշված չէ";
   if (typeof size_unit !== "string") return `typeof size_unit is ${typeof size_unit}`;
   if (!valid_size_units.includes(size_unit)) return `invalid size_unit: ${size_unit}`;
   return null;
@@ -63,8 +60,7 @@ export function check_color(color_am: string, color_ru: string) {
 }
 
 export function check_min_order(min_order_value: number, min_order_unit: T_Min_Order_Unit) {
-  if (min_order_value === undefined) return "Նվազագույն պատվերի արժեքը նշված չէ";
-  if (typeof min_order_value !== "number") return `typeof min_order_value is ${typeof min_order_value}`;
+  if (typeof min_order_value !== "number" || isNaN(min_order_value)) return `typeof min_order_value is ${isNaN(min_order_value) ? "NaN" : typeof min_order_value}`;
   if (min_order_value <= 0) return "Նվազագույն պատվերի արժեքը պետք է լինի 0-ից մեծ արժեք";
   if (!min_order_unit) return "Նվազագույն պատվերի միավորը նշված չէ";
   if (typeof min_order_unit !== "string") return `typeof min_order_unit is ${typeof min_order_unit}`;
@@ -82,7 +78,7 @@ export function check_photo(photo_src: string[]) {
   if (!photo_src || photo_src.length < 1 || !Array.isArray(photo_src)) return "Լուսանկարը բացակայում է";
   let index = 0;
   for (let src of photo_src) {
-    if (typeof src !== "string") return `typeof photo_src is ${typeof photo_src}; index = ${index}`;
+    if (typeof src !== "string") return `typeof photo_src is ${typeof src}; index = ${index}`;
     if (src.length < 20) return `Wrong photo data; index = ${index}`;
     index++;
   }
@@ -95,26 +91,26 @@ export function check_special_group(special_group: T_Special_Group | null) {
 }
 
 export function check_available(available: number) {
-  if (typeof available !== "number") return `typeof available is ${typeof available}`;
-  if (available < 0) return "Հասանելի քանակությունը պետք է լինի 0-ից մեծ կամ հավասար արժեք";
+  if (typeof available !== "number" || isNaN(available)) return `typeof available is ${isNaN(available) ? "NaN" : typeof available}`;
+  if (available < 0) return "Հասանելի քանակությունը պետք է լինի 0 կամ մեծ արժեք";
   return null;
 }
 
 export function check_photo_id(photo_id: any) {
-  if (!photo_id) return "photo_id not provided";
   if (typeof photo_id !== "string") return `typeof photo_id is ${typeof photo_id}`;
+  if (photo_id.length < 1) return "photo_id not provided";
   return null;
 }
 
 export function check_size_id(size_id: any) {
-  if (!size_id) return "size_id not provided";
   if (typeof size_id !== "string") return `typeof size_id is ${typeof size_id}`;
+  if (size_id.length < 1) return "size_id not provided";
   return null;
 }
 
 export function check_color_id(color_id: any) {
-  if (!color_id) return "color_id not provided";
   if (typeof color_id !== "string") return `typeof color_id is ${typeof color_id}`;
+  if (color_id.length < 1) return "color_id not provided";
   return null;
 }
 
