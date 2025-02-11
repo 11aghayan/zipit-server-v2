@@ -10,6 +10,7 @@ import category_router from "./routes/category-routes";
 import auth_router from "./routes/auth-routes";
 import route_not_found from "./controllers/not-found-controller";
 import order_router from "./routes/order-routes";
+import backup_router from "./routes/backup-routes";
 
 const app = express();
 const BASE_URL = '/api/v2';
@@ -25,6 +26,7 @@ app.use(`${BASE_URL}/order`, order_router);
 app.use(`${BASE_URL}/items`, item_router);
 app.use(`${BASE_URL}/photo`, photo_router);
 app.use(`${BASE_URL}/categories`, category_router);
+app.use(`${BASE_URL}/backup`, backup_router);
 app.use(`${BASE_URL}/auth`, auth_router);
 app.use(route_not_found);
 
