@@ -28,6 +28,8 @@ import {
   get_credentials,
   change_user_password
 } from "./auth-methods";
+
+import { get_all_data } from "./backup-methods";
  
 const {
   PG_USER: user,
@@ -84,5 +86,6 @@ export {
   get_credentials,
   change_user_password,
   get_cart_items,
-  get_items_by_photo_ids
+  get_items_by_photo_ids,
+  get_all_data
 };
