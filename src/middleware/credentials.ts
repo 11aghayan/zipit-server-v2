@@ -1,7 +1,7 @@
 import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 import bcrypt from "bcrypt";
-
-import * as Db from "../db";
+import Db from "../db/auth-methods";
+import { Db_Error_Response } from "../db/responses";
 import { T_Controller } from "../types";
 import { custom_error, server_error } from "../util/error_handlers";
 
@@ -15,7 +15,7 @@ export const check_credentials: T_Controller = async function(req, res, next) {
 
   try {
     const response = await Db.get_credentials(username);
-    if (response instanceof Db.Db_Error_Response) {
+    if (response instanceof Db_Error_Response) {
       return custom_error(res, 400, "Credentials fetching error");
     }
 

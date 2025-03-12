@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
-import * as Db from "../db";
+import Db from "../db/auth-methods";
+import { Db_Error_Response } from "../db/responses";
 import { T_Controller } from "../types";
 import { custom_error, server_error } from "../util/error_handlers";
 
@@ -31,7 +32,7 @@ export const change_password: T_Controller = async function(req, res) {
   
   try {
     const user = await Db.get_credentials(username);
-    if (user instanceof Db.Db_Error_Response) return custom_error(res, 400, "User fetching error");
+    if (user instanceof Db_Error_Response) return custom_error(res, 400, "User fetching error");
     if (user.rows.length < 1) return custom_error(res, 403, "Forbidden");
     const { password_hash } = user.rows[0];
 
@@ -41,7 +42,7 @@ export const change_password: T_Controller = async function(req, res) {
     const new_password_hash = await bcrypt.hash(new_password, 10);
 
     const response = await Db.change_user_password(username, new_password_hash);
-    if (response instanceof Db.Db_Error_Response) return custom_error(res, 400, "Password updating error");
+    if (response instanceof Db_Error_Response) return custom_error(res, 400, "Password updating error");
 
     return res.sendStatus(200);
   } catch (error) {
