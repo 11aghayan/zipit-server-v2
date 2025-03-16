@@ -2,13 +2,15 @@ import Db from "../../src/db/category-methods";
 import item_methods from "../../src/db/item-methods";
 import { Db_Error_Response } from "../../src/db/responses";
 
-describe("Get Admin Categories tests", () => {
-  beforeAll(async () => { 
+let category_id_list: string[] = [];
+  beforeEach(async () => {
     // Adding two categories ['category_am_1', 'category_ru_1'] and ['category_am_2', 'category_ru_2']
-    await Db.populate_category_tbl(); 
+    const id_list = await Db.populate_category_tbl() as {id: string}[];
+    category_id_list = id_list.map(obj => obj.id);
   });
-  afterAll(async () => { await Db.clear_category_tbl() });
+afterEach(async () => { await Db.clear_category_tbl() });
 
+describe("Get Admin Categories tests", () => {
   test("checking properties", async () => {
     const result = await Db.get_categories_admin();
     if (result instanceof Db_Error_Response) {
@@ -26,12 +28,6 @@ describe("Get Admin Categories tests", () => {
 });
 
 describe("Get Public Categories tests", () => {
-  beforeAll(async () => { 
-    // Adding two categories ['category_am_1', 'category_ru_1'] and ['category_am_2', 'category_ru_2']
-    await Db.populate_category_tbl(); 
-  });
-  afterAll(async () => { await Db.clear_category_tbl() });
-
   test("checking properties for lang = 'am'", async () => {
     const result = await Db.get_categories_public("am");
     if (result instanceof Db_Error_Response) {
@@ -61,8 +57,6 @@ describe("Get Public Categories tests", () => {
 });
 
 describe("Add Category tests", () => {
-  afterAll(async () => { await Db.clear_category_tbl() });
-
   test("checking for the result not to be error", async () => {
     const category_label_list = [
       ["category_am_1", "category_ru_1"],
@@ -76,13 +70,6 @@ describe("Add Category tests", () => {
 });
 
 describe("Edit Category tests", () => {
-  let category_id_list: string[] = [];
-  beforeAll(async () => {
-    const id_list = await Db.populate_category_tbl() as {id: string}[];
-    category_id_list = id_list.map(obj => obj.id);
-  });
-  afterAll(async () => { await Db.clear_category_tbl() });
-
   test("checking for the result not to be error", async () => {
     const category_label_list = [
       ["category_am_1_modified", "category_ru_1_modified"],
@@ -98,13 +85,6 @@ describe("Edit Category tests", () => {
 });
 
 describe("Delete Category", () => {
-  let category_id_list: string[] = [];
-  beforeEach(async () => {
-    const id_list = await Db.populate_category_tbl() as {id: string}[];
-    category_id_list = id_list.map(obj => obj.id);
-  });
-  afterEach(async () => { await Db.clear_category_tbl() });
-
   test("checking for an empty category deletion", async () => {
     for (const id of category_id_list) {
       const result = await Db.delete_category(id);
