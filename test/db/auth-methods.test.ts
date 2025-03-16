@@ -1,9 +1,10 @@
-import "dotenv/config";
-import { auth_methods_test as Db } from "../../src/db/auth-methods";
+import Db from "../../src/db/auth-methods";
+
+const password_hash = "$2b$10$3mBYnbs3dA4zrFYpSPx.re/JbM3c7z4AWHOJyxnIoQj.EspJj8BeO"; 
 
 describe("Get credentials tests", () => {
   beforeAll(async () => {
-    // Adds a user with username "test_username" and password_hash "test_hashed_password"
+    // Adds a user with username "test_username" and password_hash "$2b$10$3mBYnbs3dA4zrFYpSPx.re/JbM3c7z4AWHOJyxnIoQj.EspJj8BeO"
     await Db.populate_user_tbl();
   });
   afterAll(async () => {await Db.clear_user_tbl()});
@@ -13,7 +14,7 @@ describe("Get credentials tests", () => {
     expect(result).toEqual({
       error: false,
       rows: [{
-        password_hash: "test_hashed_password"
+        password_hash
       }]
     });
   });

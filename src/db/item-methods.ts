@@ -1,6 +1,5 @@
-import { Pool } from "pg";
 import { Db_Error_Response, Db_Success_Response } from "./responses";
-import { db, test_db } from "./pools";
+import db from "./pool";
 import { 
   T_Filters, 
   T_Item_Public_Full, 
@@ -18,20 +17,14 @@ import {
   T_Item_Body_Variant_Delete,
   T_Item_Body_Variant} from "../types";
 import { error_logger } from "../util/error_handlers";
-import { remove_duplicates, short_items_keys } from "../util/db-utils";
+import { is_db_test, remove_duplicates, short_items_keys } from "../util/db-utils";
 
 class Item_Methods {
-  db: Pool;
-  test: boolean;
-  
-  constructor(db: Pool, test?: "test") {
-    this.db = db;
-    this.test = test === "test";
-  }
+  test = is_db_test();
 
   async get_all_items_public({ categories, special_groups, count, offset, search }: T_Filters, sorting: string, lang: T_Lang) {
     try {
-      const { rows } = await this.db.query(
+      const { rows } = await db.query(
         ` 
           SELECT 
             i_id as id, 
@@ -97,7 +90,7 @@ class Item_Methods {
   async get_item_public(id: string, lang: T_Lang) {
     try {
       if (typeof id !== "string") throw new Error(`typeof id must be "string", provided ${typeof id}`);
-      const { rows } = await this.db.query(
+      const { rows } = await db.query(
         `
           SELECT 
             item_tbl.id,
@@ -152,7 +145,7 @@ class Item_Methods {
     try {
       let rows: T_Item_Public_Short[] = [];
       
-      const { rows: rows_1 } = await this.db.query(
+      const { rows: rows_1 } = await db.query(
         `
           SELECT ${short_items_keys(lang)}
           FROM item_tbl
@@ -171,7 +164,7 @@ class Item_Methods {
       rows = remove_duplicates(rows_1);
       
       if (rows.length < count && special_group) {
-        const { rows: rows_2 } = await this.db.query(
+        const { rows: rows_2 } = await db.query(
           `
             SELECT ${short_items_keys(lang)}
             FROM item_tbl
@@ -192,7 +185,7 @@ class Item_Methods {
   
       
       if (rows.length < count) {
-        const { rows: rows_2 } = await this.db.query(
+        const { rows: rows_2 } = await db.query(
           `
             SELECT ${short_items_keys(lang)}
             FROM item_tbl
@@ -213,7 +206,7 @@ class Item_Methods {
       
       
       if (rows.length < count) {
-        const { rows: rows_2 } = await this.db.query(
+        const { rows: rows_2 } = await db.query(
           `
             SELECT ${short_items_keys(lang)}
             FROM item_tbl
@@ -247,7 +240,7 @@ class Item_Methods {
   
   async get_cart_items(items: T_Cart_Item_Request[], lang: T_Lang) {
     try {
-      const { rows } = await this.db.query(
+      const { rows } = await db.query(
         `
           SELECT 
             i_id as id, 
@@ -298,7 +291,7 @@ class Item_Methods {
   
   async get_items_by_photo_ids(photo_ids: T_ID[]) {
     try {
-      const { rows } = await this.db.query(
+      const { rows } = await db.query(
         `
           SELECT *
             FROM item_info_tbl
@@ -330,7 +323,7 @@ class Item_Methods {
   
   async get_all_items_admin({ categories, special_groups, count, offset, search }: T_Filters, sorting: string) {
     try {
-      const { rows } = await this.db.query(
+      const { rows } = await db.query(
         `SELECT 
             i_id as id,
             name,
@@ -386,7 +379,7 @@ class Item_Methods {
       if (typeof id !== "string") {
         throw new Error("ID must be of type string");
       }
-      const rows = (await this.db.query(
+      const rows = (await db.query(
         `
           SELECT item_tbl.id as i_id, *
           FROM item_tbl
@@ -447,8 +440,8 @@ class Item_Methods {
           throw new Error("Item must have at least one photo");
         }
       }
-      await this.db.query('BEGIN;');
-      const item_id = (await this.db.query(
+      await db.query('BEGIN;');
+      const item_id = (await db.query(
         `
           INSERT INTO 
           item_tbl(category_id, name_am, name_ru)
@@ -462,11 +455,11 @@ class Item_Methods {
         await this.create_item_variant(item_id, variant);
       }
       
-      await this.db.query("COMMIT;");
+      await db.query("COMMIT;");
   
       return new Db_Success_Response<T_ID>([item_id]);
     } catch (error) {
-      await this.db.query("ROLLBACK;");
+      await db.query("ROLLBACK;");
       error_logger("db -> item-methods -> add_item\n", error);
       return new Db_Error_Response(error);
     }
@@ -527,9 +520,9 @@ class Item_Methods {
         }
       }
       
-      await this.db.query("BEGIN;");
+      await db.query("BEGIN;");
   
-      await this.db.query(
+      await db.query(
         `
           UPDATE item_tbl
           SET category_id = $1,
@@ -550,17 +543,17 @@ class Item_Methods {
         }
       }
       
-      await this.db.query("COMMIT;");
+      await db.query("COMMIT;");
     } catch (error) {
       error_logger("db -> item-methods -> edit_item\n", error);
-      await this.db.query("ROLLBACK;");
+      await db.query("ROLLBACK;");
       return new Db_Error_Response(error);
     }
   }
   
   async delete_item(id: T_ID) {
     try {
-      await this.db.query(
+      await db.query(
         `
           DELETE FROM item_tbl
           WHERE id = $1;
@@ -575,7 +568,7 @@ class Item_Methods {
   
   async get_matching_items(query: string, lang: T_Lang, limit: number) {
     try {
-      const { rows } = await this.db.query(
+      const { rows } = await db.query(
         `
           SELECT ${short_items_keys(lang)}
           FROM item_tbl
@@ -612,7 +605,7 @@ class Item_Methods {
   }
   
   async create_item_variant(item_id: string, variant: T_Item_Body_Variant) {
-    const photo_id = (await this.db.query(
+    const photo_id = (await db.query(
       `
         INSERT INTO 
         item_photo_tbl(item_id, src)
@@ -622,7 +615,7 @@ class Item_Methods {
       [item_id, variant.src]
     )).rows[0].id as T_ID;
   
-    const size_id = (await this.db.query(
+    const size_id = (await db.query(
       `
         INSERT INTO 
         item_size_tbl(size_value, size_unit, item_id)
@@ -632,7 +625,7 @@ class Item_Methods {
       [variant.size_value, variant.size_unit, item_id]
     )).rows[0].id as T_ID;
   
-    const color_id = (await this.db.query(
+    const color_id = (await db.query(
       `
         INSERT INTO 
         item_color_tbl(color_am, color_ru, item_id)
@@ -642,7 +635,7 @@ class Item_Methods {
       [variant.color_am, variant.color_ru, item_id]
     )).rows[0].id as T_ID;
   
-    await this.db.query(
+    await db.query(
       `
         INSERT INTO item_info_tbl
         (
@@ -679,7 +672,7 @@ class Item_Methods {
   }
   
   async edit_item_variant(variant: T_Item_Body_Variant_Edit) {
-    await this.db.query(
+    await db.query(
       `
         UPDATE item_photo_tbl
         SET src = $1
@@ -688,7 +681,7 @@ class Item_Methods {
       [variant.src, variant.photo_id]
     );
   
-    await this.db.query(
+    await db.query(
       `
         UPDATE item_size_tbl
         SET size_value = $1,
@@ -698,7 +691,7 @@ class Item_Methods {
       [variant.size_value, variant.size_unit, variant.size_id]
     );
   
-    await this.db.query(
+    await db.query(
       `
         UPDATE item_color_tbl
         SET color_am = $1,
@@ -708,7 +701,7 @@ class Item_Methods {
       [variant.color_am, variant.color_ru, variant.color_id]
     );
   
-    await this.db.query(
+    await db.query(
       `
         UPDATE item_info_tbl
         SET price = $1,
@@ -736,7 +729,7 @@ class Item_Methods {
   }
   
   async delete_item_variant({ color_id, photo_id, size_id }: T_Item_Body_Variant_Delete) {
-    await this.db.query(
+    await db.query(
       `
         DELETE FROM item_info_tbl
         WHERE photo_id = $1;
@@ -744,7 +737,7 @@ class Item_Methods {
       [photo_id]
     );
   
-    await this.db.query(
+    await db.query(
       `
         DELETE FROM item_photo_tbl
         WHERE id = $1;
@@ -752,7 +745,7 @@ class Item_Methods {
       [photo_id]
     );
   
-    await this.db.query(
+    await db.query(
       `
         DELETE FROM item_color_tbl
         WHERE id = $1;
@@ -760,7 +753,7 @@ class Item_Methods {
       [color_id]
     );
   
-    await this.db.query(
+    await db.query(
       `
         DELETE FROM item_size_tbl
         WHERE id = $1;
@@ -799,7 +792,7 @@ class Item_Methods {
         }
         i = j + 1;
       }
-      const { rows } = await this.db.query("SELECT id FROM item_tbl ORDER BY name_am;");
+      const { rows } = await db.query("SELECT id FROM item_tbl ORDER BY name_am;");
       return rows.map(r => r.id) as string[];
     } catch (error) {
       error_logger("db -> item-methods -> populate_item_tbl\n", error);
@@ -810,7 +803,7 @@ class Item_Methods {
   async clear_item_tbl() {
     if (!this.test) return;
     try {
-      await this.db.query("DELETE FROM item_tbl;");
+      await db.query("DELETE FROM item_tbl;");
     } catch (error) {
       error_logger("db -> item-methods -> clear_item_tbl\n", error);
       return new Db_Error_Response(error);
@@ -818,7 +811,6 @@ class Item_Methods {
   }
 }
 
-const item_methods = new Item_Methods(db);
-export const item_methods_test = new Item_Methods(test_db, "test");
+const item_methods = new Item_Methods();
 
 export default item_methods;

@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 import Db from "../db/auth-methods";
 import { Db_Error_Response } from "../db/responses";

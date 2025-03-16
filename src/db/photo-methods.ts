@@ -1,19 +1,13 @@
 import { Db_Error_Response, Db_Success_Response } from "./responses";
-import { db, test_db } from "./pools";
+import db from "./pool";
 import { error_logger } from "../util/error_handlers";
 import { T_ID } from "../types";
-import { Pool } from "pg";
 
 class Photo_Methods {
-  db: Pool;
-  
-  constructor(db: Pool) {
-    this.db = db;
-  }
 
   async get_photo(id: T_ID, index: string) {
     try {
-      const { rows } = await this.db.query(
+      const { rows } = await db.query(
         `
           SELECT src[$1]
           FROM item_photo_tbl
@@ -30,7 +24,6 @@ class Photo_Methods {
   }
 }
 
-const photo_methods = new Photo_Methods(db);
-export const photo_methods_test = new Photo_Methods(test_db);
+const photo_methods = new Photo_Methods();
 
 export default photo_methods;

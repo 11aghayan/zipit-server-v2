@@ -1,20 +1,14 @@
-import { Pool } from "pg";
 import { Db_Error_Response, Db_Success_Response } from "./responses";
-import { db, test_db } from "./pools";
+import db from "./pool";
 import { error_logger } from "../util/error_handlers";
+import { is_db_test } from "../util/db-utils";
 
 class Auth_Methods {
-  db: Pool;
-  test: boolean;
-
-  constructor(db: Pool, test?: "test") {
-    this.db = db;
-    this.test = test === "test";
-  }
+  test = is_db_test();
 
   async get_credentials(username: string) {
     try {
-      const { rows } = await this.db.query(
+      const { rows } = await db.query(
         `
           SELECT password_hash
           FROM user_tbl
@@ -32,7 +26,7 @@ class Auth_Methods {
   
   async change_user_password(username: string, password_hash: string) {
     try {
-      await this.db.query(
+      await db.query(
         `
           UPDATE user_tbl
           SET password_hash = $1
@@ -49,10 +43,10 @@ class Auth_Methods {
   async populate_user_tbl() {
     if (!this.test) return;
     try {
-      await this.db.query(
+      await db.query(
         `
           INSERT INTO user_tbl(username, password_hash)
-          VALUES ('test_username', 'test_hashed_password');
+          VALUES ('test_username', '$2b$10$3mBYnbs3dA4zrFYpSPx.re/JbM3c7z4AWHOJyxnIoQj.EspJj8BeO');
         `
       );
     } catch (error) {
@@ -64,7 +58,7 @@ class Auth_Methods {
   async clear_user_tbl() {
     if (!this.test) return;
     try {
-      await this.db.query(
+      await db.query(
         `
           DELETE FROM user_tbl;
         `
@@ -76,7 +70,6 @@ class Auth_Methods {
   }
 }
 
-const auth_methods = new Auth_Methods(db);
-export const auth_methods_test = new Auth_Methods(test_db, "test");
+const auth_methods = new Auth_Methods();
 
 export default auth_methods;

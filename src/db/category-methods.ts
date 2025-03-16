@@ -1,22 +1,16 @@
 import { Db_Error_Response, Db_Success_Response } from "./responses";
-import { item_methods_test } from "./item-methods";
-import { db, test_db } from "./pools";
+import item_methods from "./item-methods";
+import db from "./pool";
 import { error_logger } from "../util/error_handlers";
 import { T_Category_Response_Admin, T_Category_Response_Public, T_ID, T_Lang } from "../types";
-import { Pool } from "pg";
+import { is_db_test } from "../util/db-utils";
 
 class Category_Methods {
-  db: Pool;
-  test: boolean;
-
-  constructor(db: Pool, test?: "test") {
-    this.db = db;
-    this.test = test === "test";
-  }
+  test = is_db_test();
 
   async get_categories_admin() {
     try {
-      const { rows } = await this.db.query(
+      const { rows } = await db.query(
         `
           SELECT
             category_tbl.id,
@@ -46,7 +40,7 @@ class Category_Methods {
   
   async get_categories_public(lang: T_Lang) {
     try {
-      const { rows } = await this.db.query(
+      const { rows } = await db.query(
         `
           SELECT
             category_tbl.id,
@@ -75,7 +69,7 @@ class Category_Methods {
   
   async add_category(label_am: string, label_ru: string) {
     try {
-      await this.db.query(
+      await db.query(
         `
           INSERT INTO 
           category_tbl(label_am, label_ru)
@@ -91,7 +85,7 @@ class Category_Methods {
   
   async edit_category(id: T_ID, label_am: string, label_ru: string) {
     try {
-      await this.db.query(
+      await db.query(
         `
           UPDATE category_tbl
           SET label_am = $1,
@@ -108,7 +102,7 @@ class Category_Methods {
   
   async delete_category(id: T_ID) {
     try {
-      await this.db.query(
+      await db.query(
         `
           DELETE FROM category_tbl
           WHERE id = $1;
@@ -128,7 +122,7 @@ class Category_Methods {
   async populate_category_tbl() {
     if (!this.test) return;
     try {
-      await this.db.query(
+      await db.query(
         `
           INSERT INTO category_tbl(label_am, label_ru)
           VALUES
@@ -136,7 +130,7 @@ class Category_Methods {
             ('category_am_2', 'category_ru_2');
         `
       );
-      const { rows } = await this.db.query("SELECT ID from category_tbl ORDER BY label_am;");
+      const { rows } = await db.query("SELECT ID from category_tbl ORDER BY label_am;");
       return rows as { id: string }[];
     } catch (error) {
       error_logger("db -> category-methods -> populate_category_tbl\n", error);
@@ -147,8 +141,8 @@ class Category_Methods {
   async clear_category_tbl() {
     if (!this.test) return;
     try {
-      await item_methods_test.clear_item_tbl();
-      await this.db.query("DELETE FROM category_tbl;");
+      await item_methods.clear_item_tbl();
+      await db.query("DELETE FROM category_tbl;");
     } catch (error) {
       error_logger("db -> category-methods -> clear_category_tbl\n", error);
       return new Db_Error_Response(error);
@@ -156,7 +150,6 @@ class Category_Methods {
   }
 }
 
-const category_methods = new Category_Methods(db);
-export const category_methods_test = new Category_Methods(test_db, "test");
+const category_methods = new Category_Methods();
 
 export default category_methods;

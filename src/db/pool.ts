@@ -9,7 +9,7 @@ const {
 } = process.env;
 const port = Number(process.env.PG_PORT ?? "5432");
 
-export const db = new Pool({
+const db = new Pool({
   user,
   host,
   database,
@@ -17,10 +17,4 @@ export const db = new Pool({
   password
 });
 
-export const test_db = new Pool({
-  user,
-  host,
-  database: database_test,
-  port,
-  password
-});
+export default db;

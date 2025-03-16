@@ -23,10 +23,9 @@
 //   ]
 // }
 
-import "dotenv/config";
-import { category_methods_test } from "../../src/db/category-methods";
-import { item_methods_test } from "../../src/db/item-methods";
-import { photo_methods_test as Db } from "../../src/db/photo-methods";
+import category_methods from "../../src/db/category-methods";
+import item_methods from "../../src/db/item-methods";
+import Db from "../../src/db/photo-methods";
 import { Db_Error_Response } from "../../src/db/responses";
 import { T_ID } from "../../src/types";
 
@@ -35,20 +34,20 @@ let item_id_list: T_ID[] = [];
 let category_id_list: T_ID[] = [];
 
 beforeEach(async () => {
-  const result = await category_methods_test.populate_category_tbl() as { id: string }[];
+  const result = await category_methods.populate_category_tbl() as { id: string }[];
   category_id_list = result.map(c => c.id);
-  const id_list = await item_methods_test.populate_item_tbl(category_id_list) as string[];
+  const id_list = await item_methods.populate_item_tbl(category_id_list) as string[];
   item_id_list = id_list;
 });
 afterEach(async () => {
-  await item_methods_test.clear_item_tbl();
-  await category_methods_test.clear_category_tbl();
+  await item_methods.clear_item_tbl();
+  await category_methods.clear_category_tbl();
 });
 
 describe("Get Photo tests", () => {
   test("checking with existing photo_ids", async () => {
     for (const item_id of item_id_list) {
-      const get_item_result = await item_methods_test.get_item_admin(item_id);
+      const get_item_result = await item_methods.get_item_admin(item_id);
       if (get_item_result instanceof Db_Error_Response) {
         expect(get_item_result).toBe(1);
         return;

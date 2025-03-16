@@ -181,10 +181,10 @@ export const check_category_labels: T_Controller = function(req, res, next) {
 export const check_new_password: T_Controller = function(req, res, next) {
   const { password, new_password } = req.body;
 
-  if (!password) return custom_error(res, 400, "Գաղտնաբառը բացակայում է");
-  if (!new_password) return custom_error(res, 400, "Նոր գաղտնաբառը բացակայում է");
   if (typeof password !== "string") return custom_error(res, 400, `typeof password is ${typeof password}`); 
+  if (!password) return custom_error(res, 400, "Գաղտնաբառը բացակայում է");
   if (typeof new_password !== "string") return custom_error(res, 400, `typeof new_password is ${typeof new_password}`); 
+  if (!new_password) return custom_error(res, 400, "Նոր գաղտնաբառը բացակայում է");
   
   const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!,@,#,$,%,^,&,*,(,),?,>,<,-,_,{,}]).{8,32}$/gm;
   const is_format_correct = regex.test(new_password);

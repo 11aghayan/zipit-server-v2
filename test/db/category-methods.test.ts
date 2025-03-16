@@ -1,6 +1,5 @@
-import "dotenv/config";
-import { category_methods_test as Db } from "../../src/db/category-methods";
-import { item_methods_test } from "../../src/db/item-methods";
+import Db from "../../src/db/category-methods";
+import item_methods from "../../src/db/item-methods";
 import { Db_Error_Response } from "../../src/db/responses";
 
 describe("Get Admin Categories tests", () => {
@@ -113,7 +112,7 @@ describe("Delete Category", () => {
     }
   });
   test("checking for a non empty category deletion", async () => {
-    await item_methods_test.populate_item_tbl(category_id_list);
+    await item_methods.populate_item_tbl(category_id_list);
     for (const id of category_id_list) {
       const result = await Db.delete_category(id);
       expect(result).toBe("Կատեգորիան ջնջելու համար այն պետք է չպարունակի որևէ ապրանք");

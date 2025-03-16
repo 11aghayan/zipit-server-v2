@@ -3,7 +3,6 @@ import express from "express";
 import cookieParser from "cookie-parser";
 
 import { cors, credentials } from "./middleware/cors";
-import { error_logger } from "./util/error_handlers";
 import item_router from "./routes/item-routes";
 import photo_router from "./routes/photo-routes";
 import category_router from "./routes/category-routes";
@@ -13,7 +12,7 @@ import order_router from "./routes/order-routes";
 import backup_router from "./routes/backup-routes";
 
 export const app = express();
-const BASE_URL = '/api/v2';
+export const BASE_URL = '/api/v2';
 
 // Middleware
 app.use(express.json({ limit: '50mb' }));

@@ -23,9 +23,8 @@
   //   ]
   // }
 
-import "dotenv/config";
-import { category_methods_test } from "../../src/db/category-methods";
-import { item_methods_test as Db } from "../../src/db/item-methods";
+import category_methods from "../../src/db/category-methods";
+import Db from "../../src/db/item-methods";
 import { Db_Error_Response } from "../../src/db/responses";
 import { T_ID, T_Item_Admin_Full, T_Item_Body, T_Item_Body_Edit, T_Item_Body_Variant_Edit } from "../../src/types";
 
@@ -35,14 +34,14 @@ let item_id_list: T_ID[] = [];
 let category_id_list: T_ID[] = [];
 
 beforeEach(async () => {
-  const result = await category_methods_test.populate_category_tbl() as { id: string }[];
+  const result = await category_methods.populate_category_tbl() as { id: string }[];
   category_id_list = result.map(c => c.id);
   const id_list = await Db.populate_item_tbl(category_id_list) as string[];
   item_id_list = id_list;
 });
 afterEach(async () => {
   await Db.clear_item_tbl();
-  await category_methods_test.clear_category_tbl();
+  await category_methods.clear_category_tbl();
 });
 
 describe("Get All Public Items tests", () => {
