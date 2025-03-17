@@ -1,8 +1,9 @@
 // Credentials { username: 'test_username', password: 'test_password' } -- hash - $2b$10$6fRtIcAwPEx.kMRLvGOgZ.O8H7ejDWhDPjKXvbYsaEZCiZzC/fcCK
 
 import db from "../../src/db/auth-methods";
-import request, { Response } from "supertest";
+import request from "supertest";
 import { app, BASE_URL } from "../../src";
+import { get_jwt_token, jwt_in_cookies } from "../test-util";
 
 const HASH = "$2b$10$6fRtIcAwPEx.kMRLvGOgZ.O8H7ejDWhDPjKXvbYsaEZCiZzC/fcCK";
 
@@ -153,20 +154,3 @@ describe("Change Password tests", () => {
     expect(res.status).toBe(403);
   });
 });
-
-function jwt_in_cookies(res: Response) {
-  return (res.headers["set-cookie"] as unknown as string[])?.some(cookie => {
-    const [key, value] = cookie.split("=");
-    return key === "jwt_token" && value.length > 150;
-  }) ?? false;
-}
-
-function get_jwt_token(res: Response) {
-  return (res.headers["set-cookie"] as unknown as string[])?.reduce((prev, cookie) => {
-    const [key, value] = cookie.split("=");
-    if (key === "jwt_token") {
-      return value;
-    }
-    return prev;
-  }, "");
-}

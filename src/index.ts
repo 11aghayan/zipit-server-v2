@@ -31,7 +31,7 @@ app.use(route_not_found);
 
 
 const PORT = process.env.PORT || 3200;
-const server = app.listen(PORT, () => {
+export const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
