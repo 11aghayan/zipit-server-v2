@@ -2,13 +2,16 @@
 
 import db from "../../src/db/auth-methods";
 import request from "supertest";
-import { app, BASE_URL } from "../../src";
+import { app, BASE_URL, server } from "../../src";
 import { get_jwt_token, jwt_in_cookies } from "../test-util";
 
 const HASH = "$2b$10$6fRtIcAwPEx.kMRLvGOgZ.O8H7ejDWhDPjKXvbYsaEZCiZzC/fcCK";
 
 beforeEach(async () => await db.populate_user_tbl());
-afterEach(async () => await db.clear_user_tbl());
+afterEach(async () => {
+  server.close();
+  await db.clear_user_tbl();
+});
 
 describe("Login tests", () => {
   test("login with correct credentials", async () => {

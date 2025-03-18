@@ -14,6 +14,7 @@ afterEach(async () => {
   await db_item.clear_item_tbl();
   await db_category.clear_category_tbl();
   await db_auth.clear_user_tbl();
+  server.close();
 });
 
 describe("Backup Db tests", () => {

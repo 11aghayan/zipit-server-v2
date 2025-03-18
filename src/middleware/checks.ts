@@ -161,10 +161,10 @@ export const check_query: T_Controller = function(req, res, next) {
 export const check_category_labels: T_Controller = function(req, res, next) {
   const { label_am, label_ru } = req.body;
 
-  if (!label_am) return custom_error(res, 400, "Կատեգորիայի հայերեն անվանումը նշված չէ");
-  if (!label_ru) return custom_error(res, 400, "Կատեգորիայի ռուսերեն անվանումը նշված չէ");
   if (typeof label_am !== "string") return custom_error(res, 400, `typeof label_am is ${typeof label_am}`);
+  if (!label_am) return custom_error(res, 400, "Կատեգորիայի հայերեն անվանումը նշված չէ");
   if (typeof label_ru !== "string") return custom_error(res, 400, `typeof label_ru is ${typeof label_ru}`);
+  if (!label_ru) return custom_error(res, 400, "Կատեգորիայի ռուսերեն անվանումը նշված չէ");
   const label_am_trimmed = label_am.trim();
   const label_ru_trimmed = label_ru.trim();
   if (label_am_trimmed.length < 1) return custom_error(res, 400, "Կատեգորիայի հայերեն անվանումը նշված չէ");
