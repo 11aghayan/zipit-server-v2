@@ -144,16 +144,6 @@ export const check_query: T_Controller = function(req, res, next) {
   if (query_trimmed.length < 1) return res.status(200).json({ length: 0, items: [] });
   const query_sliced = query_trimmed.slice(0, 100);
   req.query.query = `%${query_sliced}%`;
-
-  if (
-      !limit 
-      || typeof(limit) !== "string" 
-      || isNaN(Number(limit))
-      || Number(limit) < 1
-      || Number(limit) > 100
-    ) req.query.limit = "10";
-
-  req.query.limit = Math.trunc(Number(limit)).toString();
   
   next();
 }
@@ -200,8 +190,8 @@ export const check_cart_items_body: T_Controller = function(req, res, next) {
   if (!items || !Array.isArray(items)) return custom_error(res, 400 , "No items or items is not iterable");
 
   for (let item of items) {
-    if (!item.item_id) return custom_error(res, 400, "No Item ID");
-    if (!item.photo_id) return custom_error(res, 400, "No Photo ID");
+    if (!item.item_id || typeof item.item_id !== "string") return custom_error(res, 400, "No Item ID or Item ID of wrong type");
+    if (!item.photo_id || typeof item.photo_id !== "string") return custom_error(res, 400, "No Photo ID or Photo ID of wrong type");
   }
   
   next();

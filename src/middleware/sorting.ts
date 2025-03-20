@@ -17,8 +17,8 @@ export const filter_items: T_Controller = function(req, _res, next) {
   const offset = (page_num - 1) * count_num;
   
   req.body.filters = {
-    special_groups: special_groups && typeof special_groups === "string" ? special_groups.split(",") : null,
-    categories: categories && typeof categories === "string" ? categories.split(",") : null,
+    special_groups: !!special_groups && special_groups !== "null" && typeof special_groups === "string" ? special_groups.split(",") : null,
+    categories: !!categories && categories !== "null" && typeof categories === "string" ? categories.split(",") : null,
     count: count_num,
     offset,
     search: typeof search === "string" && search.length > 0 ? `%${search}%` : null

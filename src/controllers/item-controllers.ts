@@ -27,7 +27,11 @@ export const get_item_public: T_Controller = async function(req, res) {
     if (item instanceof Db_Error_Response) {
       return custom_error(res, 500, "Item fetching error");
     }
-
+    
+    if (item.rows.length < 1) {
+      return custom_error(res, 404, "Item not found");
+    }
+    
     const response = item.rows.reduce((prev: T_Item_Public_Full_Response, current: T_Item_Public_Full) => {
       const obj = {} as T_Item_Public_Common;
       const common_keys = ["id", "category_id", "category", "name"] as (keyof T_Item_Public_Common)[];
@@ -168,8 +172,21 @@ export const delete_item: T_Controller = async function(req, res) {
 export const get_matching_items: T_Controller = async function(req, res) {
   const { query, lang, limit } = req.query as { query: string, lang: T_Lang, limit: string };
   
+  let limit_str = limit;
+  let limit_num: number;
+  
+  if (
+    !limit 
+    || typeof(limit) !== "string" 
+    || isNaN(Number(limit))
+    || Number(limit) < 1
+    || Number(limit) > 100
+  ) limit_str = "10";
+
+  limit_num = Math.trunc(Number(limit_str));
+  
   try {
-    const items = await Db.get_matching_items(query, lang, Number(limit));
+    const items = await Db.get_matching_items(query, lang, limit_num);
     if (items instanceof Db_Error_Response) {
       return custom_error(res, 500, "Items fetching error");
     }
