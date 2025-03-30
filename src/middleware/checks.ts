@@ -122,9 +122,9 @@ export const check_item_body: T_Controller = function(req, res, next) {
 }
 
 export const check_photo_sizes: T_Controller = function(req, res, next) {
-  const { width, height } = req.query;
-  if (!width) return custom_error(res, 400, "Image width not provided");
-  if (!height) return custom_error(res, 400, "Image height not provided");
+  const { width, height } = req.query as { width?: string, height?: string };
+  if (!width || width.trim().length < 1) return custom_error(res, 400, "Image width not provided");
+  if (!height || height.trim().length < 1) return custom_error(res, 400, "Image height not provided");
   
   const num_width = Number(width);
   const num_height = Number(height);
@@ -138,7 +138,7 @@ export const check_photo_sizes: T_Controller = function(req, res, next) {
 }
 
 export const check_query: T_Controller = function(req, res, next) {
-  const { query, limit } = req.query;
+  const { query } = req.query;
 
   if (!query) return res.status(200).json({ length: 0, items: [] });
   if (typeof query !== "string") return custom_error(res, 400, `typeof query is ${typeof query}`);

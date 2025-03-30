@@ -15,7 +15,7 @@ class Photo_Methods {
         `,
         [index, id]
       );
-  
+      if (rows.length < 1 || rows[0]?.src === null) throw new Error("No photos found");
       return new Db_Success_Response<{ src: string }>(rows);
     } catch (error) {
       error_logger("db -> photo-methods -> get_photo\n", error);

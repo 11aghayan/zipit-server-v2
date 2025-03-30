@@ -65,10 +65,7 @@ describe("Get Photo tests", () => {
   });
   test("checking with a non existing photo_id", async () => {
     const result = await Db.get_photo(wrong_id, "1");
-    if (result instanceof Db_Error_Response) {
-      expect(result).toBe(1);
-      return;
-    }
-    expect(result.rows).toHaveLength(0);
+    expect(result).toBeInstanceOf(Db_Error_Response);
+    expect(result).toEqual(new Db_Error_Response(new Error("No photos found")));
   });
 });
