@@ -1,4 +1,4 @@
-import Db from "../../src/db/auth-methods";
+import Db from "../../db/auth-methods";
 
 const password_hash = "$2b$10$3mBYnbs3dA4zrFYpSPx.re/JbM3c7z4AWHOJyxnIoQj.EspJj8BeO"; 
 

@@ -1,5 +1,5 @@
-import { T_Lang } from "../../src/types";
-import { remove_duplicates, short_items_keys } from "../../src/util/db-utils";
+import { T_Lang } from "../../types";
+import { remove_duplicates, short_items_keys } from "../../util/db-utils";
 
 describe("short_item_keys tests", () => {
   const keys_am = `

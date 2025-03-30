@@ -1,10 +1,10 @@
 import request from "supertest";
-import db from "../../src/db/category-methods";
-import db_auth from "../../src/db/auth-methods";
-import db_items from "../../src/db/item-methods";
-import { app, BASE_URL, server } from "../../src";
+import db from "../../db/category-methods";
+import db_auth from "../../db/auth-methods";
+import db_items from "../../db/item-methods";
+import { app, BASE_URL, server } from "../..";
 import { get_jwt_token } from "../test-util";
-import { T_ID } from "../../src/types";
+import { T_ID } from "../../types";
 
 const lang_list = ["am", "ru"] as const;
 let id_list: T_ID[];

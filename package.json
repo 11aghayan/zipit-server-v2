@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "npx nodemon",
-    "build": "rimraf ./dist && tsc",
+    "build": "pnpm test && rimraf ./dist && tsc",
     "start": "node dist/index.js",
     "test": "jest --runInBand --forceExit"
   },

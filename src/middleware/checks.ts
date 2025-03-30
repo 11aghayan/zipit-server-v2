@@ -54,8 +54,10 @@ export const check_item_body: T_Controller = function(req, res, next) {
   let variant_index = 0;
   
   for (let variant of variants) {
-    
-    if ("photo_id" in variant && "size_id" in variant && "color_id" in variant) {
+    if ("photo_id" in variant || "size_id" in variant || "color_id" in variant) {
+      if (!("photo_id" in variant)) return custom_error(res, 400, "typeof photo_id is undefined"); 
+      if (!("size_id" in variant)) return custom_error(res, 400, "typeof size_id is undefined"); 
+      if (!("color_id" in variant)) return custom_error(res, 400, "typeof color_id is undefined"); 
       const photo_id_error = check_photo_id(variant.photo_id);
       if (photo_id_error) return custom_error(res, 400, photo_id_error);
 
@@ -92,8 +94,8 @@ export const check_item_body: T_Controller = function(req, res, next) {
       ...req.body.variants[variant_index],
       color_am: variant.color_am.trim(),
       color_ru: variant.color_ru.trim(),
-      description_am: variant.description_am ? variant.description_am.trim() : null,
-      description_ru: variant.description_ru ? variant.description_ru.trim() : null
+      description_am: variant.description_am?.trim() || null,
+      description_ru: variant.description_ru?.trim() || null
     };
 
     const photo_error = check_photo(variant.src);

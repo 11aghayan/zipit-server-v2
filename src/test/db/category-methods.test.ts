@@ -1,6 +1,6 @@
-import Db from "../../src/db/category-methods";
-import item_methods from "../../src/db/item-methods";
-import { Db_Error_Response } from "../../src/db/responses";
+import Db from "../../db/category-methods";
+import item_methods from "../../db/item-methods";
+import { Db_Error_Response } from "../../db/responses";
 
 let category_id_list: string[] = [];
   beforeEach(async () => {

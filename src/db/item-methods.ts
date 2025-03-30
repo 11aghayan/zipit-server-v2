@@ -18,6 +18,7 @@ import {
   T_Item_Body_Variant} from "../types";
 import { error_logger } from "../util/error_handlers";
 import { is_db_test, remove_duplicates, short_items_keys } from "../util/db-utils";
+import { valid_photo_src } from "../test/test-util";
 
 class Item_Methods {
   test = is_db_test();
@@ -526,8 +527,8 @@ class Item_Methods {
         `
           UPDATE item_tbl
           SET category_id = $1,
-              name_am = $2,
-              name_ru = $3
+            name_am = $2,
+            name_ru = $3
           WHERE id = $4;
         `,
         [item.category_id, item.name_am, item.name_ru, item.id]
@@ -785,7 +786,7 @@ class Item_Methods {
                 size_unit: "num",
                 size_value: i,
                 special_group: i === 1 ? "prm" : null,
-                src: ["photo_src_1_abcdefghijklmnop", "photo_src_2_abcdefghijklmnop"]
+                src: [valid_photo_src, valid_photo_src]
               }
             ]
           });

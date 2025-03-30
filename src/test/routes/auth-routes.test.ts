@@ -1,8 +1,8 @@
 // Credentials { username: 'test_username', password: 'test_password' } -- hash - $2b$10$6fRtIcAwPEx.kMRLvGOgZ.O8H7ejDWhDPjKXvbYsaEZCiZzC/fcCK
 
-import db from "../../src/db/auth-methods";
+import db from "../../db/auth-methods";
 import request from "supertest";
-import { app, BASE_URL, server } from "../../src";
+import { app, BASE_URL, server } from "../..";
 import { get_jwt_token, jwt_in_cookies } from "../test-util";
 
 const HASH = "$2b$10$6fRtIcAwPEx.kMRLvGOgZ.O8H7ejDWhDPjKXvbYsaEZCiZzC/fcCK";

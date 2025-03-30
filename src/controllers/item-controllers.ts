@@ -115,7 +115,7 @@ export const get_item_admin: T_Controller = async function(req, res) {
           variant
         ]
       };
-    }, { id: "", category_id: "", category_label_am: "", category_label_ru: "", name_ru: "", name_am: "", variants: [] } as T_Item_Admin_Full_Response) as T_Item_Admin_Full_Response;
+    }, { id: "", category_id: "", name_ru: "", name_am: "", variants: [] } as T_Item_Admin_Full_Response) as T_Item_Admin_Full_Response;
     
     return res.status(200).json({ item: response })
   } catch (error) {

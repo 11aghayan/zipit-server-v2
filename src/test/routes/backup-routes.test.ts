@@ -1,8 +1,8 @@
-import db_auth from "../../src/db/auth-methods";
-import db_item from "../../src/db/item-methods";
-import db_category from "../../src/db/category-methods";
+import db_auth from "../../db/auth-methods";
+import db_item from "../../db/item-methods";
+import db_category from "../../db/category-methods";
 import request from "supertest";
-import { app, server, BASE_URL } from "../../src";
+import { app, server, BASE_URL } from "../..";
 import { get_jwt_token } from "../test-util";
 
 beforeEach(async () => {

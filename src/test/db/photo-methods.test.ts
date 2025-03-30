@@ -18,16 +18,17 @@
 //       size_unit: 'num',
 //       size_value: index,
 //       special_group: 'prm' & null,
-//       src: ['photo_src_1_abcdefghijklmnop', 'photo_src_2_abcdefghijklmnop']
+//       src: [valid_photo_src, valid_photo_src]
 //     }
 //   ]
 // }
 
-import category_methods from "../../src/db/category-methods";
-import item_methods from "../../src/db/item-methods";
-import Db from "../../src/db/photo-methods";
-import { Db_Error_Response } from "../../src/db/responses";
-import { T_ID } from "../../src/types";
+import category_methods from "../../db/category-methods";
+import item_methods from "../../db/item-methods";
+import Db from "../../db/photo-methods";
+import { Db_Error_Response } from "../../db/responses";
+import { T_ID } from "../../types";
+import { valid_photo_src } from "../test-util";
 
 const wrong_id = "0a773263-ddaf-4c44-b5f0-8de15f81599f";
 let item_id_list: T_ID[] = [];
@@ -58,7 +59,7 @@ describe("Get Photo tests", () => {
           expect(result).toBe(1);
           return;
         }
-        expect(result.rows[0].src).toBe(`photo_src_${i}_abcdefghijklmnop`);
+        expect(result.rows[0].src).toBe(valid_photo_src);
       }
     }
   });

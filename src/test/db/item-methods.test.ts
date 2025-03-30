@@ -18,15 +18,16 @@
   //       size_unit: 'num',
   //       size_value: index,
   //       special_group: 'prm' & null,
-  //       src: ['photo_src_1_abcdefghijklmnop', 'photo_src_2_abcdefghijklmnop']
+  //       src: [valid_photo_src, valid_photo_src]
   //     }
   //   ]
   // }
 
-import category_methods from "../../src/db/category-methods";
-import Db from "../../src/db/item-methods";
-import { Db_Error_Response } from "../../src/db/responses";
-import { T_ID, T_Item_Admin_Full, T_Item_Body, T_Item_Body_Edit, T_Item_Body_Variant_Edit } from "../../src/types";
+import category_methods from "../../db/category-methods";
+import Db from "../../db/item-methods";
+import { Db_Error_Response } from "../../db/responses";
+import { T_ID, T_Item_Admin_Full, T_Item_Body, T_Item_Body_Edit, T_Item_Body_Variant_Edit } from "../../types";
+import { valid_photo_src } from "../test-util";
 
 const lang_list = ["am", "ru"] as const;
 const wrong_id = "0a773263-ddaf-4c44-b5f0-8de15f81599f";
@@ -484,7 +485,7 @@ describe("Get Admin Item tests", () => {
       expect(item?.special_group).toBe(index === 1 ? "prm" : null);
       expect(item?.src).toHaveLength(2);
       for (let i = 1; i <= 2; i++) {
-        expect(item?.src[i - 1]).toBe(`photo_src_${i}_abcdefghijklmnop`);
+        expect(item?.src[i - 1]).toBe(valid_photo_src);
       }
       index++;
     }
@@ -530,7 +531,7 @@ describe("Add Item tests", () => {
           size_unit: "cm",
           size_value: 2,
           special_group: "liq",
-          src: ["photo_src_1_abcdefghijklmnop", "photo_src_2_abcdefghijklmnop"]
+          src: [valid_photo_src, valid_photo_src]
         }
       ]
     } as T_Item_Body;
@@ -978,7 +979,7 @@ describe("Edit Item tests", () => {
           expect(res).toBe(1);
           return;
         }
-        expect(res.rows[0].src).toEqual(["photo_src_1_abcdefghijklmnop_edited", "photo_src_2_abcdefghijklmnop"]);
+        expect(res.rows[0].src).toEqual([`${valid_photo_src}_edited`, valid_photo_src]);
       }
     });
     test("removing photo_src[1]", async () => {
@@ -1000,7 +1001,7 @@ describe("Edit Item tests", () => {
           expect(res).toBe(1);
           return;
         }
-        expect(res.rows[0].src).toEqual(["photo_src_1_abcdefghijklmnop"]);
+        expect(res.rows[0].src).toEqual([valid_photo_src]);
       }
     });
   });
@@ -1031,7 +1032,7 @@ describe("Edit Item tests", () => {
               size_unit: "num",
               size_value: index,
               special_group: "prm",
-              src: ["photo_src_1_abcdefghijklmnop", "photo_src_2_abcdefghijklmnop"]
+              src: [valid_photo_src, valid_photo_src]
             }
           ]
         });

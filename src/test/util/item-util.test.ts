@@ -15,18 +15,18 @@ import {
   check_photo_id,
   check_size_id,
   check_color_id
-} from "../../src/util/item-utils";
+} from "../../util/item-utils";
 
 describe("Category ID checks", () => {
   test("checking category id for the value \"123\": string", () => {
     expect(check_category("123")).toBe(null);
   });
   test("checking category id for falsy values", () => {
-    ["", false, undefined, null, 0, NaN]
+    ["", "  "]
       .forEach(val => expect(check_category(val)).toBe("category_id not provided"));
   });
   test("checking category id for wrong types", () => {
-    [1, true, {}, [], () => {}]
+    [1, true, , false, undefined, null, 0, NaN, {}, [], () => {}]
       .forEach(val => expect(check_category(val)).toBe(`typeof category_id is ${typeof val}`));
   });
 });
@@ -36,7 +36,7 @@ describe("Name checks", () => {
     expect(check_name("armenian name", "russian name")).toBe(null);
   });
   test("checking name for falsy values", () => {
-    ["", false, undefined, null, 0, NaN]
+    ["", "  "]
       .forEach(val => {
         expect(check_name(val, val)).toBe("Հայերեն անվանումը նշված չէ");
         expect(check_name(val, "russian name")).toBe("Հայերեն անվանումը նշված չէ");
@@ -44,7 +44,7 @@ describe("Name checks", () => {
       });
   });
   test("checking name for wrong types", () => {
-    [1, true, {}, [], () => {}]
+    [1, true, false, undefined, null, 0, NaN, {}, [], () => {}]
       .forEach(val => {
         expect(check_name(val, val)).toBe(`typeof name_am is ${typeof val}`);
         expect(check_name(val, "russian name")).toBe(`typeof name_am is ${typeof val}`);
@@ -64,7 +64,10 @@ describe("Price checks", () => {
   });
   test("checking price for wrong types", () => {
     ["", "a", true, {}, [], () => {}, undefined, null, NaN]
-      .forEach(val => expect(check_price(val)).toBe(`typeof price is ${isNaN(val) ? "NaN" : typeof val}`));
+      .forEach(val => {
+        const val_json = JSON.parse(JSON.stringify({ key: val })).key;
+        expect(check_price(val_json)).toBe(`typeof price is ${typeof val_json}`)
+      });
   });
   test("checking price for negative value", () => {
     expect(check_price(-1)).toBe("Գինը պետք է լինի 0-ից մեծ արժեք");
@@ -77,12 +80,14 @@ describe("Promo checks", () => {
       .forEach(val => expect(check_promo(val)).toBe(null));
   });
   test("checking promo for wrong types", () => {
-    ["", "123", true, undefined, NaN, {}, [], () => {}]
-      .forEach(val => expect(check_promo(val)).toBe(`typeof promo is ${isNaN(val) ? "NaN" : typeof val}`));
+    ["", "123", true, undefined, {}, [], () => {}]
+      .forEach(val => {
+        const val_json = JSON.parse(JSON.stringify({ key: val })).key;
+        expect(check_promo(val_json)).toBe(`typeof promo is ${typeof val_json}`)
+      });
   });
-  test("checking promo for values less or equal to zero", () => {
-    [-1, 0]
-      .forEach(val => expect(check_promo(val)).toBe("Ակցիան կամ պետք է լինի անջատված կամ 0-ից մեծ արժեք"));
+  test("checking promo for values less than zero", () => {
+    expect(check_promo(-1)).toBe("Ակցիան պետք է լինի 0 կամ 0-ից մեծ արժեք");
   });
 });
 
@@ -92,7 +97,10 @@ describe("Size checks", () => {
   });
   test("checking size for wrong value types and unit mm", () => {
     ["", "123", true, undefined, NaN, {}, [], () => {}]
-      .forEach(val => expect(check_size(val, "mm")).toBe(`typeof size_value is ${isNaN(val) ? "NaN" : typeof val}`));
+      .forEach(val => {
+        const val_json = JSON.parse(JSON.stringify({ key: val })).key;
+        expect(check_size(val_json, "mm")).toBe(`typeof size_value is ${typeof val_json}`)
+      });
   });
   test("checking size for value less than 0 and unit mm", () => {
     expect(check_size(-1, "mm")).toBe("Չափի արժեքը պետք է լինի 0 և մեծ արժեք");
@@ -121,16 +129,8 @@ describe("Color checks", () => {
   test("checking color for the values \"armenian color\" and \"russian color\"", () => {
     expect(check_color("armenian color", "russian color")).toBe(null);
   });
-  test("checking color for falsy values", () => {
-    ["", false, undefined, null, 0, NaN]
-      .forEach(val => {
-        expect(check_color(val, val)).toBe("Գույնի հայերեն անվանումը նշված չէ");
-        expect(check_color(val, "russian color")).toBe("Գույնի հայերեն անվանումը նշված չէ");
-        expect(check_color("armenian color", val)).toBe("Գույնի ռուսերեն անվանումը նշված չէ");
-      });
-  });
   test("checking color for wrong types", () => {
-    [1, true, {}, [], () => {}]
+    [1,0, false, true, undefined, null, NaN, {}, [], () => {}]
       .forEach(val => {
         expect(check_color(val, val)).toBe(`typeof color_am is ${typeof val}`);
         expect(check_color(val, "russian color")).toBe(`typeof color_am is ${typeof val}`);
@@ -159,19 +159,21 @@ describe("Min order checks", () => {
     expect(check_min_order(1, "box")).toBe(null);
   });
   test("checking min order for wrong value types and unit \"box\"", () => {
-    ["", "a", true, {}, [], () => {}, undefined, null, NaN]
-      .forEach(val => expect(check_min_order(val, "box")).toBe(`typeof min_order_value is ${isNaN(val) ? "NaN" : typeof val}`));
+    ["", "a", false, true, {}, [], () => {}, undefined, null, NaN]
+      .forEach(val => { 
+        const val_json = JSON.parse(JSON.stringify({ key: val })).key;
+        expect(check_min_order(val_json, "box")).toBe(`typeof min_order_value is ${typeof val_json}`)
+      });
   });
   test("checking min order for a negative number value and unit \"box\"", () => {
     expect(check_min_order(-1, "box")).toBe("Նվազագույն պատվերի արժեքը պետք է լինի 0-ից մեծ արժեք");
   });
-  test("checking min order for value 1 and false units", () => {
-    ["", false, undefined, null, 0, NaN]
-      .forEach(val => expect(check_min_order(1, val)).toBe("Նվազագույն պատվերի միավորը նշված չէ"));
-  });
   test("checking min order for value 1 and wrong unit types", () => {
-    [1, true, {}, [], () => {}]
-      .forEach(val => expect(check_min_order(1, val)).toBe(`typeof min_order_unit is ${typeof val}`));
+    [0, 1, false, true, undefined, null, NaN, {}, [], () => {}]
+      .forEach(val => {
+        const val_json = JSON.parse(JSON.stringify({ key: val })).key;
+        expect(check_min_order(1, val_json)).toBe(`typeof min_order_unit is ${typeof val_json}`)
+      });
   });
   test("checking min order for value 1 and an invalid unit", () => {
     expect(check_min_order(1, "mm")).toBe("invalid min_order_unit: mm");
@@ -195,8 +197,8 @@ describe("Description checks", () => {
 });
 
 describe("Photo checks", () => {
-  test("checking photo_src for a valid value: ['abcdefghijklmnopqrstuvwxyz']", () => {
-    expect(check_photo(["abcdefghijklmnopqrstuvwxyz"])).toBe(null);
+  test("checking photo_src for a valid value: ['data:image/jpg;base64,abcdefghijklmnopqrstuvwxyz']", () => {
+    expect(check_photo(["data:image/jpg;base64,abcdefghijklmnopqrstuvwxyz"])).toBe(null);
   });
   test("checking photo_src for falsy values", () => {
     ["", false, undefined, null, 0, NaN]
@@ -246,7 +248,10 @@ describe("Available checks", () => {
   });
   test("checking available for wrong types", () => {
     [NaN, null, undefined, {}, [], true, "asd", () => {}]
-    .forEach(val => expect(check_available(val)).toBe(`typeof available is ${isNaN(val) ? "NaN" : typeof val}`))
+    .forEach(val => { 
+      const val_json = JSON.parse(JSON.stringify({ key: val })).key;
+      expect(check_available(val_json)).toBe(`typeof available is ${typeof val_json}`)
+    });
   });
   test("checking available for value less than 0", () => {
     expect(check_available(-1)).toBe("Հասանելի քանակությունը պետք է լինի 0 կամ մեծ արժեք");
