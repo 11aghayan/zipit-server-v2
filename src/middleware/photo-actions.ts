@@ -1,7 +1,6 @@
 import sharp from "sharp";
-
-import * as Db from '../db';
-
+import Db from "../db/photo-methods"; 
+import { Db_Error_Response } from '../db/responses';
 import { T_Controller, T_Item_Body, T_Item_Body_Variant, T_Item_Body_Variant_Edit } from "../types";
 import { custom_error, error_logger, server_error } from "../util/error_handlers";
 
@@ -44,10 +43,9 @@ export const convert_photos_to_webp: T_Controller = async function(req, res, nex
 export const get_photo_from_db: T_Controller = async function(req, res, next) {
   const { width, height, index } = req.query;
   const { id } = req.params;
-  if (!id) return custom_error(res, 404, "ID not provided");
   try {
     const response = await Db.get_photo(id, index as string);
-    if (response instanceof Db.Db_Error_Response) {
+    if (response instanceof Db_Error_Response) {
       return custom_error(res, 500, "Photo fetching error");
     }
     req.body.image = {

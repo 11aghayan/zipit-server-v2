@@ -4,6 +4,7 @@ declare namespace NodeJS {
     PG_HOST: string;
     PG_PORT: string;
     PG_DATABASE: string;
+    PG_DATABASE_TEST: string;
     PG_PASSWORD: string;
     JWT_TOKEN_SECRET: string;
     ADMIN_URL_LIST: string;

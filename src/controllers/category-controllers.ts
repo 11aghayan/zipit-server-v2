@@ -1,4 +1,5 @@
-import * as Db from "../db";
+import Db from "../db/category-methods";
+import { Db_Error_Response } from "../db/responses";
 import { T_Controller, T_Lang } from "../types";
 import { custom_error, server_error } from "../util/error_handlers";
 
@@ -7,7 +8,7 @@ export const get_categories_public: T_Controller = async function(req, res) {
   
   try {
     const categories = await Db.get_categories_public(lang);
-    if (categories instanceof Db.Db_Error_Response) {
+    if (categories instanceof Db_Error_Response) {
       return custom_error(res, 500, "Categories fetching error");
     }
 
@@ -17,10 +18,10 @@ export const get_categories_public: T_Controller = async function(req, res) {
   }
 }
 
-export const get_categories_admin: T_Controller = async function(req, res) {
+export const get_categories_admin: T_Controller = async function(_req, res) {
   try {
     const categories = await Db.get_categories_admin();
-    if (categories instanceof Db.Db_Error_Response) {
+    if (categories instanceof Db_Error_Response) {
       return custom_error(res, 500, "Categories fetching error");
     }
 
@@ -35,7 +36,7 @@ export const add_category: T_Controller = async function(req, res) {
 
   try {
     const response = await Db.add_category(label_am, label_ru);
-    if (response instanceof Db.Db_Error_Response) {
+    if (response instanceof Db_Error_Response) {
       return custom_error(res, 500, "Category adding error");
     }
     
@@ -51,7 +52,7 @@ export const edit_category: T_Controller = async function(req, res) {
   
   try {
     const response = await Db.edit_category(id, label_am, label_ru);
-    if (response instanceof Db.Db_Error_Response) {
+    if (response instanceof Db_Error_Response) {
       return custom_error(res, 500, "Category editing error");
     }
 
@@ -71,7 +72,7 @@ export const delete_category: T_Controller = async function(req, res) {
       return custom_error(res, 400, response);
     }
     
-    if (response instanceof Db.Db_Error_Response) {
+    if (response instanceof Db_Error_Response) {
       return custom_error(res, 500, "Category deletion error");
     }
 

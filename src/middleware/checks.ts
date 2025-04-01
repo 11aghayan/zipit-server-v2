@@ -1,4 +1,4 @@
-import { T_Cart_Item_Request, T_Controller, T_ID, T_Item_Body } from "../types";
+import { T_Cart_Item_Request, T_Controller, T_Item_Body } from "../types";
 import { custom_error } from "../util/error_handlers";
 import { 
   check_available, 
@@ -54,8 +54,10 @@ export const check_item_body: T_Controller = function(req, res, next) {
   let variant_index = 0;
   
   for (let variant of variants) {
-    
-    if ("photo_id" in variant && "size_id" in variant && "color_id" in variant) {
+    if ("photo_id" in variant || "size_id" in variant || "color_id" in variant) {
+      if (!("photo_id" in variant)) return custom_error(res, 400, "typeof photo_id is undefined"); 
+      if (!("size_id" in variant)) return custom_error(res, 400, "typeof size_id is undefined"); 
+      if (!("color_id" in variant)) return custom_error(res, 400, "typeof color_id is undefined"); 
       const photo_id_error = check_photo_id(variant.photo_id);
       if (photo_id_error) return custom_error(res, 400, photo_id_error);
 
@@ -92,8 +94,8 @@ export const check_item_body: T_Controller = function(req, res, next) {
       ...req.body.variants[variant_index],
       color_am: variant.color_am.trim(),
       color_ru: variant.color_ru.trim(),
-      description_am: variant.description_am ? variant.description_am.trim() : null,
-      description_ru: variant.description_ru ? variant.description_ru.trim() : null
+      description_am: variant.description_am?.trim() || null,
+      description_ru: variant.description_ru?.trim() || null
     };
 
     const photo_error = check_photo(variant.src);
@@ -120,9 +122,9 @@ export const check_item_body: T_Controller = function(req, res, next) {
 }
 
 export const check_photo_sizes: T_Controller = function(req, res, next) {
-  const { width, height } = req.query;
-  if (!width) return custom_error(res, 400, "Image width not provided");
-  if (!height) return custom_error(res, 400, "Image height not provided");
+  const { width, height } = req.query as { width?: string, height?: string };
+  if (!width || width.trim().length < 1) return custom_error(res, 400, "Image width not provided");
+  if (!height || height.trim().length < 1) return custom_error(res, 400, "Image height not provided");
   
   const num_width = Number(width);
   const num_height = Number(height);
@@ -136,7 +138,7 @@ export const check_photo_sizes: T_Controller = function(req, res, next) {
 }
 
 export const check_query: T_Controller = function(req, res, next) {
-  const { query, limit } = req.query;
+  const { query } = req.query;
 
   if (!query) return res.status(200).json({ length: 0, items: [] });
   if (typeof query !== "string") return custom_error(res, 400, `typeof query is ${typeof query}`);
@@ -144,16 +146,6 @@ export const check_query: T_Controller = function(req, res, next) {
   if (query_trimmed.length < 1) return res.status(200).json({ length: 0, items: [] });
   const query_sliced = query_trimmed.slice(0, 100);
   req.query.query = `%${query_sliced}%`;
-
-  if (
-      !limit 
-      || typeof(limit) !== "string" 
-      || isNaN(Number(limit))
-      || Number(limit) < 1
-      || Number(limit) > 100
-    ) req.query.limit = "10";
-
-  req.query.limit = Math.trunc(Number(limit)).toString();
   
   next();
 }
@@ -161,10 +153,10 @@ export const check_query: T_Controller = function(req, res, next) {
 export const check_category_labels: T_Controller = function(req, res, next) {
   const { label_am, label_ru } = req.body;
 
-  if (!label_am) return custom_error(res, 400, "Կատեգորիայի հայերեն անվանումը նշված չէ");
-  if (!label_ru) return custom_error(res, 400, "Կատեգորիայի ռուսերեն անվանումը նշված չէ");
   if (typeof label_am !== "string") return custom_error(res, 400, `typeof label_am is ${typeof label_am}`);
+  if (!label_am) return custom_error(res, 400, "Կատեգորիայի հայերեն անվանումը նշված չէ");
   if (typeof label_ru !== "string") return custom_error(res, 400, `typeof label_ru is ${typeof label_ru}`);
+  if (!label_ru) return custom_error(res, 400, "Կատեգորիայի ռուսերեն անվանումը նշված չէ");
   const label_am_trimmed = label_am.trim();
   const label_ru_trimmed = label_ru.trim();
   if (label_am_trimmed.length < 1) return custom_error(res, 400, "Կատեգորիայի հայերեն անվանումը նշված չէ");
@@ -181,10 +173,10 @@ export const check_category_labels: T_Controller = function(req, res, next) {
 export const check_new_password: T_Controller = function(req, res, next) {
   const { password, new_password } = req.body;
 
-  if (!password) return custom_error(res, 400, "Գաղտնաբառը բացակայում է");
-  if (!new_password) return custom_error(res, 400, "Նոր գաղտնաբառը բացակայում է");
   if (typeof password !== "string") return custom_error(res, 400, `typeof password is ${typeof password}`); 
+  if (!password) return custom_error(res, 400, "Գաղտնաբառը բացակայում է");
   if (typeof new_password !== "string") return custom_error(res, 400, `typeof new_password is ${typeof new_password}`); 
+  if (!new_password) return custom_error(res, 400, "Նոր գաղտնաբառը բացակայում է");
   
   const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!,@,#,$,%,^,&,*,(,),?,>,<,-,_,{,}]).{8,32}$/gm;
   const is_format_correct = regex.test(new_password);
@@ -200,8 +192,8 @@ export const check_cart_items_body: T_Controller = function(req, res, next) {
   if (!items || !Array.isArray(items)) return custom_error(res, 400 , "No items or items is not iterable");
 
   for (let item of items) {
-    if (!item.item_id) return custom_error(res, 400, "No Item ID");
-    if (!item.photo_id) return custom_error(res, 400, "No Photo ID");
+    if (!item.item_id || typeof item.item_id !== "string") return custom_error(res, 400, "No Item ID or Item ID of wrong type");
+    if (!item.photo_id || typeof item.photo_id !== "string") return custom_error(res, 400, "No Photo ID or Photo ID of wrong type");
   }
   
   next();

@@ -26,3 +26,7 @@ export function remove_duplicates<T extends { id: T_ID }>(arr: T[]) {
     ];
   }, [] as T[]);
 }
+
+export function is_db_test() {
+  return (process.env.PG_DATABASE as string)?.endsWith("test");
+}
