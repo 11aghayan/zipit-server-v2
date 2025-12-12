@@ -49,7 +49,7 @@ describe("Backup Db tests", () => {
             "min_order_value", "min_order_unit",
             "description_am",  "description_ru",
             "special_group",   "available",
-            "creation_date"
+            "creation_date", "item_code"
           ];
         }
         expect(Object.keys(obj)).toEqual(props);

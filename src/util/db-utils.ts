@@ -9,6 +9,7 @@ export function short_items_keys(lang: T_Lang) {
     photo_id,
     price,
     promo,
+    item_code,
     special_group,
     size_value,
     size_unit,

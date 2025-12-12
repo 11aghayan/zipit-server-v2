@@ -58,6 +58,7 @@ export type T_Item_Info = {
   min_order_unit: T_Min_Order_Unit;
   description_am: string | null;
   description_ru: string | null;
+  item_code: string | null;
   special_group: T_Special_Group | null;
   creation_date: number;
   available: number;
@@ -74,6 +75,7 @@ export type T_Filters = {
 export type T_Item_Public_Short = {
   id: T_ID;
   name: string;
+  item_code: string | null;
   photo_id: T_ID;
   price: number;
   promo: number | null;
@@ -105,6 +107,7 @@ export type T_Item_Public_Variant = {
   min_order_value: number;
   min_order_unit: T_Min_Order_Unit;
   description: string;
+  item_code: string | null;
   special_group: T_Special_Group | null;
   available: number;
 };
@@ -144,6 +147,7 @@ export type T_Item_Body_Variant = {
   min_order_unit: T_Min_Order_Unit;
   description_am: string | null;
   description_ru: string | null;
+  item_code: string | null;
   special_group: T_Special_Group | null;
   available: number;
   size_value: number;

@@ -69,6 +69,14 @@ export function check_description(description_am: string | null, description_ru:
   return null;
 }
 
+export function check_item_code(item_code: string | null) {
+    if (typeof item_code != "string") return `typeof item_code is ${typeof item_code}`;
+    const trimmed_code = item_code.trim();
+    if (trimmed_code.length == 0) return "Ապրանքի կոդը նշված չէ";
+    if (trimmed_code.length > 50) return "Ապրանքի կոդը պետք է լինի առավելագույնը 50 նիշ";
+    return null;
+}
+
 export function check_photo(photo_src: string[]) {
   if (!Array.isArray(photo_src) || photo_src.length < 1) return "Լուսանկարը բացակայում է";
   let index = 0;

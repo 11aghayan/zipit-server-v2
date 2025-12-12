@@ -34,6 +34,7 @@ class Item_Methods {
             price,
             promo,
             special_group,
+            item_code,
             size_value,
             size_unit,
             color_${lang} as color,
@@ -65,6 +66,8 @@ class Item_Methods {
                 name_am ILIKE $5
                 OR
                 name_ru ILIKE $5
+                OR
+                (item_code LIKE $5 AND char_length(item_code) = char_length($5) - 2)
               )
             ORDER BY ${sorting}
             LIMIT $3
@@ -100,6 +103,7 @@ class Item_Methods {
             name_${lang} as name,
             photo_id,
             price,
+            item_code,
             promo,
             size_id,
             size_value,
@@ -252,6 +256,7 @@ class Item_Methods {
             special_group,
             size_value,
             size_unit,
+            item_code,
             color_${lang} as color,
             min_order_value,
             min_order_unit,
@@ -328,6 +333,7 @@ class Item_Methods {
         `SELECT 
             i_id as id,
             name,
+            item_code,
             p_id as photo_id,
             count
           FROM(
@@ -357,6 +363,8 @@ class Item_Methods {
                 name_am ILIKE $5
                 OR
                 name_ru ILIKE $5
+                OR
+                (item_code LIKE $5 AND char_length(item_code) = char_length($5) - 2)
               )
             ORDER BY ${sorting}
             LIMIT $3
@@ -437,6 +445,9 @@ class Item_Methods {
         ) {
           throw new Error("type of color_am and type of color_ru must be string, the length must be greater than 0");
         }
+        if (typeof variant.item_code !== "string" || variant.item_code.trim().length === 0) {
+            throw new Error("item_code must be a non empty string");
+        }
         if (variant?.src.length < 1) {
           throw new Error("Item must have at least one photo");
         }
@@ -510,6 +521,9 @@ class Item_Methods {
           if (typeof variant.special_group !== "string" && variant.special_group !== null) {
             throw new Error("type of special group must be either string or null");
           }
+          if (typeof variant.item_code !== "string" || variant.item_code.trim().length === 0) {
+            throw new Error("type of item code must be a non empty string");
+          }
           if (!Array.isArray(variant.src) || variant.src.length < 1) {
             throw new Error("photo src must be a non empty string array");
           }
@@ -520,7 +534,6 @@ class Item_Methods {
           }
         }
       }
-      
       await db.query("BEGIN;");
   
       await db.query(
@@ -563,44 +576,6 @@ class Item_Methods {
       );
     } catch (error) {
       error_logger("db -> item-methods -> delete_item\n", error);
-      return new Db_Error_Response(error);
-    }
-  }
-  
-  async get_matching_items(query: string, lang: T_Lang, limit: number) {
-    try {
-      const { rows } = await db.query(
-        `
-          SELECT ${short_items_keys(lang)}
-          FROM item_tbl
-          LEFT JOIN category_tbl
-          ON category_tbl.id = item_tbl.category_id
-          LEFT JOIN item_info_tbl
-          ON item_tbl.id = item_info_tbl.item_id
-          LEFT JOIN item_size_tbl
-          ON item_info_tbl.size_id = item_size_tbl.id
-          LEFT JOIN item_color_tbl
-          ON item_info_tbl.color_id = item_color_tbl.id 
-          WHERE 
-            name_am ILIKE $1
-            OR
-            name_ru ILIKE $1
-            OR
-            label_am ILIKE $1
-            OR
-            label_ru ILIKE $1
-            OR
-            description_am ILIKE $1
-            OR
-            description_ru ILIKE $1
-          LIMIT $2;
-        `,
-        [query, limit]
-      );
-  
-      return new Db_Success_Response<T_Item_Public_Short>(rows);
-    } catch (error) {
-      error_logger("db -> item-methods -> get_matching_items\n", error);
       return new Db_Error_Response(error);
     }
   }
@@ -651,9 +626,10 @@ class Item_Methods {
           item_id,
           size_id,
           color_id,
-          photo_id
+          photo_id,
+          item_code
         )
-        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
+        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);
       `,
       [
         variant.price, 
@@ -667,7 +643,8 @@ class Item_Methods {
         item_id,
         size_id,
         color_id,
-        photo_id
+        photo_id,
+        variant.item_code
       ]
     );
   }
@@ -701,7 +678,7 @@ class Item_Methods {
       `,
       [variant.color_am, variant.color_ru, variant.color_id]
     );
-  
+
     await db.query(
       `
         UPDATE item_info_tbl
@@ -711,9 +688,10 @@ class Item_Methods {
             min_order_unit = $4,
             description_am = $5,
             description_ru = $6,
-            special_group = $7,
-            available = $8
-        WHERE photo_id = $9;
+            item_code = $7,
+            special_group = $8,
+            available = $9
+        WHERE photo_id = $10;
       `,
       [
         variant.price, 
@@ -722,9 +700,10 @@ class Item_Methods {
         variant.min_order_unit, 
         variant.description_am, 
         variant.description_ru,
+        variant.item_code,
         variant.special_group,
         variant.available,
-        variant.photo_id
+        variant.photo_id,
       ]
     );
   }
@@ -779,6 +758,7 @@ class Item_Methods {
                 color_ru: `color_ru_${i}`,
                 description_am: `description_am_${i}`,
                 description_ru: `description_ru_${i}`,
+                item_code: `item_code_${i}`,
                 min_order_unit: "box",
                 min_order_value: i,
                 price: 100 * i,

@@ -129,7 +129,7 @@ export const add_item: T_Controller = async function(req, res, next) {
   try {
     const response = await Db.add_item(body);
     if (response instanceof Db_Error_Response) {
-      return custom_error(res, 500, "Item adding error");
+      return custom_error(res, 500, ""+response.err);
     }
 
     const id = response.rows[0];
@@ -147,7 +147,7 @@ export const edit_item: T_Controller = async function(req, res, next) {
   try {
     const response = await Db.edit_item({ ...body, id });
     if (response instanceof Db_Error_Response) {
-      return custom_error(res, 500, "Item editing error");
+      return custom_error(res, 500, ""+response.err);
     }
 
     return await get_item_admin(req, res, next);
@@ -161,39 +161,11 @@ export const delete_item: T_Controller = async function(req, res) {
   try {
     const response = await Db.delete_item(id);
     if (response instanceof Db_Error_Response) {
-      return custom_error(res, 500, "Item deleting error");
+      return custom_error(res, 500, ""+response.err);
     }
     return res.sendStatus(200);
   } catch (error) {
     return server_error(res, "delete_item", error);
-  }
-}
-
-export const get_matching_items: T_Controller = async function(req, res) {
-  const { query, lang, limit } = req.query as { query: string, lang: T_Lang, limit: string };
-  
-  let limit_str = limit;
-  let limit_num: number;
-  
-  if (
-    !limit 
-    || typeof(limit) !== "string" 
-    || isNaN(Number(limit))
-    || Number(limit) < 1
-    || Number(limit) > 100
-  ) limit_str = "10";
-
-  limit_num = Math.trunc(Number(limit_str));
-  
-  try {
-    const items = await Db.get_matching_items(query, lang, limit_num);
-    if (items instanceof Db_Error_Response) {
-      return custom_error(res, 500, "Items fetching error");
-    }
-
-    return res.status(200).json({ length: items.rows.length, items: items.rows });
-  } catch (error) {
-    return server_error(res, "get_matching_items", error);
   }
 }
 

@@ -14,7 +14,8 @@ import {
   check_available,
   check_photo_id,
   check_size_id,
-  check_color_id
+  check_color_id,
+  check_item_code
 } from "../../util/item-utils";
 
 describe("Category ID checks", () => {
@@ -189,9 +190,27 @@ describe("Description checks", () => {
   test("checking description for wrong types", () => {
     [1, true, undefined, NaN, {}, [], () => {}]
       .forEach(val => {
-        expect(check_description(val, "description_ru")).toBe(`typeof description_am is ${typeof val}`)
+        expect(check_description(val, "description_ru")).toBe(`typeof description_am is ${typeof val}`);
         expect(check_description("description_am", val)).toBe(`typeof description_ru is ${typeof val}`);
         expect(check_description(val, val)).toBe(`typeof description_am is ${typeof val}`);
+      });
+  });
+});
+
+describe("Item code checks", () => {
+    test("checking item_code for valid strings", () => {
+        expect(check_item_code("item_code")).toBe(null);
+        expect(check_item_code("i")).toBe(null);
+    });
+    test("checking item_code for invalid strings", () => {
+        expect(check_item_code("")).toBe("Ապրանքի կոդը նշված չէ");
+        expect(check_item_code(" ")).toBe("Ապրանքի կոդը նշված չէ");
+        expect(check_item_code("012345678901234567890123456789012345678901234567890")).toBe("Ապրանքի կոդը պետք է լինի առավելագույնը 50 նիշ");
+    });
+    test("checking item_code for wrong types", () => {
+    [null, 1, true, undefined, NaN, {}, [], () => {}]
+      .forEach(val => {
+        expect(check_item_code(val)).toBe(`typeof item_code is ${typeof val}`);
       });
   });
 });

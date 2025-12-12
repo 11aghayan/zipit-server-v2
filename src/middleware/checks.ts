@@ -6,6 +6,7 @@ import {
   check_color, 
   check_color_id, 
   check_description, 
+  check_item_code, 
   check_min_order, 
   check_name, 
   check_photo, 
@@ -90,12 +91,16 @@ export const check_item_body: T_Controller = function(req, res, next) {
     const description_error = check_description(variant.description_am, variant.description_ru);
     if (description_error) return custom_error(res, 400, description_error);
 
+    const item_code_error = check_item_code(variant.item_code);
+    if (item_code_error) return custom_error(res, 400, item_code_error);
+
     req.body.variants[variant_index] = {
       ...req.body.variants[variant_index],
       color_am: variant.color_am.trim(),
       color_ru: variant.color_ru.trim(),
       description_am: variant.description_am?.trim() || null,
-      description_ru: variant.description_ru?.trim() || null
+      description_ru: variant.description_ru?.trim() || null,
+      item_code: variant.item_code?.trim()
     };
 
     const photo_error = check_photo(variant.src);
@@ -134,19 +139,6 @@ export const check_photo_sizes: T_Controller = function(req, res, next) {
   if (num_width < 1) return custom_error(res, 400, "Image width must be value greater than or equal to 1");
   if (num_height < 1) return custom_error(res, 400, "Image height must be value greater than or equal to 1");
 
-  next();
-}
-
-export const check_query: T_Controller = function(req, res, next) {
-  const { query } = req.query;
-
-  if (!query) return res.status(200).json({ length: 0, items: [] });
-  if (typeof query !== "string") return custom_error(res, 400, `typeof query is ${typeof query}`);
-  const query_trimmed = query.trim();
-  if (query_trimmed.length < 1) return res.status(200).json({ length: 0, items: [] });
-  const query_sliced = query_trimmed.slice(0, 100);
-  req.query.query = `%${query_sliced}%`;
-  
   next();
 }
 

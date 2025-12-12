@@ -11,6 +11,7 @@
   //       color_ru: 'color_ru_index',
   //       description_am: 'description_am_index',
   //       description_ru: 'description_ru_index',
+  //       item_code: '{itemid}_item_code_{index}',
   //       min_order_unit: 'box',
   //       min_order_value: index,
   //       price: 100 * index,
@@ -64,6 +65,7 @@ describe("Get All Public Items tests", () => {
         expect(item?.count).toBe(4);
         expect(item?.min_order_unit).toBe("box");
         expect(item?.min_order_value).toBe(index);
+        expect(item?.item_code).toBe(`item_code_${index}`);
         expect(item?.price).toBe(index * 100);
         expect(item?.promo).toBe(index === 1 ? null : index * 50);
         expect(item?.size_unit).toBe("num");
@@ -183,6 +185,7 @@ describe("Get Public Item tests", () => {
         expect(item?.category).toBe(`category_${lang}_${category_id_list.indexOf(item?.category_id) + 1}`);
         expect(item?.color).toBe(`color_${lang}_${index}`);
         expect(item?.description).toBe(`description_${lang}_${index}`);
+        expect(item?.item_code).toBe(`item_code_${index}`);
         expect(item?.min_order_unit).toBe("box");
         expect(item?.min_order_value).toBe(index);
         expect(item?.name).toBe(`name_${lang}_${index}`);
@@ -266,6 +269,7 @@ describe("Get Cart Items tests", () => {
         expect(item.min_order_unit).toBe("box");
         expect(item.min_order_value).toBe(index);
         expect(item.name).toBe(`name_${lang}_${index}`);
+        expect(item.item_code).toBe(`item_code_${index}`);
         expect(item.price).toBe(index * 100);
         expect(item.promo).toBe(index === 1 ? null : index * 50);
         expect(item.size_unit).toBe("num");
@@ -328,6 +332,7 @@ describe("Get Items by Photo Ids tests", () => {
       expect(item?.color_ru).toBe(`color_ru_${index}`);
       expect(item?.description_am).toBe(`description_am_${index}`);
       expect(item?.description_ru).toBe(`description_ru_${index}`);
+      expect(item?.item_code).toBe(`item_code_${index}`);
       expect(item?.min_order_unit).toBe("box");
       expect(item?.min_order_value).toBe(index);
       expect(item?.name_am).toBe(`name_am_${index}`);
@@ -474,6 +479,7 @@ describe("Get Admin Item tests", () => {
       expect(item?.color_ru).toBe(`color_ru_${index}`);
       expect(item?.description_am).toBe(`description_am_${index}`);
       expect(item?.description_ru).toBe(`description_ru_${index}`);
+      expect(item?.item_code).toBe(`item_code_${index}`);
       expect(item?.min_order_unit).toBe("box");
       expect(item?.min_order_value).toBe(index);
       expect(item?.name_am).toBe(`name_am_${index}`);
@@ -524,6 +530,7 @@ describe("Add Item tests", () => {
           color_ru: "color_ru_1",
           description_am: "description_am_1",
           description_ru: "description_ru_1",
+          item_code: "item_code_1",
           price: 100,
           promo: 30,
           min_order_unit: "roll",
@@ -564,6 +571,18 @@ describe("Add Item tests", () => {
   });
   test("adding an item with no variants", async () => {
     const result = await Db.add_item({ ...valid_item, variants: [] });
+    expect(result).toBeInstanceOf(Db_Error_Response);
+  });
+  test("adding an item with missing item_code", async () => {
+    const result = await Db.add_item({
+      ...valid_item,
+        variants: [
+            {
+                ...valid_item.variants[0],
+                item_code: ""
+            }
+        ]
+    });
     expect(result).toBeInstanceOf(Db_Error_Response);
   });
   test("adding an item with missing color", async () => {
@@ -775,6 +794,29 @@ describe("Edit Item tests", () => {
         }
         expect(res.rows[0].description_am).toBe(`description_am_${index}_edited`);
         expect(res.rows[0].description_ru).toBe(`description_ru_${index}_edited`);
+        index++;
+      }
+    });
+    test("changing item_code", async () => {
+      let index = 1;
+      for (const it of items) {
+        const item = it as T_Item_Body_Edit & {
+          id: string,
+          variants: T_Item_Body_Variant_Edit[]
+        }
+        item.variants[0].item_code = item.variants[0].item_code + "_edited";
+        const result = await Db.edit_item(item);
+        if (result instanceof Db_Error_Response) {
+          expect(result).toBe(1);
+          return;
+        }
+        expect(result).toBeUndefined();
+        const res = await Db.get_item_admin(item.id);
+        if (res instanceof Db_Error_Response) {
+          expect(res).toBe(1);
+          return;
+        }
+        expect(res.rows[0].item_code).toBe(`item_code_${index}_edited`);
         index++;
       }
     });
@@ -1008,6 +1050,7 @@ describe("Edit Item tests", () => {
   test("adding a variant", async () => {
     for (const item_id of item_id_list) {
       const get_item_result = await Db.get_item_admin(item_id);
+      const res = await Db.get_all_items_admin({ categories: null, count: 10, offset: 0, search: null, special_groups: null }, "name asc");
       if (get_item_result instanceof Db_Error_Response) {
         expect(get_item_result).toBe(1);
         return;
@@ -1025,6 +1068,7 @@ describe("Edit Item tests", () => {
               color_ru: `color_ru_${index}`,
               description_am: `description_am_${index}`,
               description_ru: `description_ru_${index}`,
+              item_code: `item_code_${index}_${item.id.slice(0,5)}`,
               min_order_unit: "box",
               min_order_value: index,
               price: index * 100,
@@ -1051,6 +1095,7 @@ describe("Edit Item tests", () => {
             expect(variant.color_ru).toBe(`color_ru_${i}`);
             expect(variant.description_am).toBe(`description_am_${i}`);
             expect(variant.description_ru).toBe(`description_ru_${i}`);
+            expect(variant.item_code?.startsWith("item_code")).toBe(true);
             expect(variant.min_order_value).toBe(i);
             expect(variant.size_value).toBe(i);
             expect(variant.price).toBe(i * 100);
@@ -1141,6 +1186,24 @@ describe("Edit Item tests", () => {
                 description_am: value,
                 // @ts-ignore
                 description_ru: value
+              }
+            ]
+          });
+          expect(result).toBeInstanceOf(Db_Error_Response);
+        }
+      }
+    });
+    test("changing item_code", async () => {
+      for (const item of items) {
+        const wrong_values = ["", 0, 1, undefined, true, false, {}, [], () => {}, NaN, null];
+        for (const value of wrong_values) {
+          const result = await Db.edit_item({
+            ...item,
+            variants: [
+              {
+                ...item.variants[0],
+                // @ts-ignore
+                item_code: value,
               }
             ]
           });
@@ -1332,6 +1395,7 @@ describe("Edit Item tests", () => {
       color_ru: "color_ru_tst",
       description_am: "description_am_tst",
       description_ru: "description_ru_tst",
+      item_code: "item_code_tst",
       min_order_unit: "box",
       min_order_value: 2,
       price: 100,
@@ -1410,6 +1474,27 @@ describe("Edit Item tests", () => {
                 description_am: value,
                 description_ru: value
               }
+            ]
+          });
+          expect(result).toBeInstanceOf(Db_Error_Response);
+        }
+      }
+    });
+    test("wrong item_code", async () => {
+      for (const item of items) {
+        const wrong_values = ["", 0, 1, undefined, true, false, {}, [], () => {}, NaN, null];
+        for (const value of wrong_values) {
+          const result = await Db.edit_item({
+            ...item,
+            variants: [
+                //@ts-ignore
+                ...item.variants,
+                //@ts-ignore
+                {
+                    ...valid_variant,
+                    item_code: value,
+                    
+                }
             ]
           });
           expect(result).toBeInstanceOf(Db_Error_Response);
@@ -1638,149 +1723,6 @@ describe("Delete Item tests", () => {
       return;
     }
     expect(get_result.rows).toHaveLength(item_id_list.length);
-  });
-});
-
-describe("Get Matching Items tests", () => {
-  test("checking with value name_am", async () => {
-    for (const lang of lang_list) {
-      const result = await Db.get_matching_items("%name_am%", lang, 10);
-      if (result instanceof Db_Error_Response) {
-        expect(result).toBe(1);
-        return;
-      }
-      expect(result.rows).toHaveLength(4);
-    }
-  });
-  test("checking with value ame_a", async () => {
-    for (const lang of lang_list) {
-      const result = await Db.get_matching_items("%ame_a%", lang, 10);
-      if (result instanceof Db_Error_Response) {
-        expect(result).toBe(1);
-        return;
-      }
-      expect(result.rows).toHaveLength(4);
-    }
-  });
-  test("checking with value ame_r", async () => {
-    for (const lang of lang_list) {
-      const result = await Db.get_matching_items("%ame_r%", lang, 10);
-      if (result instanceof Db_Error_Response) {
-        expect(result).toBe(1);
-        return;
-      }
-      expect(result.rows).toHaveLength(4);
-    }
-  });
-  test("checking with value name_am_1", async () => {
-    for (const lang of lang_list) {
-      const result = await Db.get_matching_items("%name_am_1%", lang, 10);
-      if (result instanceof Db_Error_Response) {
-        expect(result).toBe(1);
-        return;
-      }
-      expect(result.rows).toHaveLength(1);
-    }
-  });
-  test("checking with value name_ru_2", async () => {
-    for (const lang of lang_list) {
-      const result = await Db.get_matching_items("%name_ru_2%", lang, 10);
-      if (result instanceof Db_Error_Response) {
-        expect(result).toBe(1);
-        return;
-      }
-      expect(result.rows).toHaveLength(1);
-    }
-  });
-  test("checking with value nme_ru", async () => {
-    for (const lang of lang_list) {
-      const result = await Db.get_matching_items("%nme_ru%", lang, 10);
-      if (result instanceof Db_Error_Response) {
-        expect(result).toBe(1);
-        return;
-      }
-      expect(result.rows).toHaveLength(0);
-    }
-  });
-  test("checking with value category_ru", async () => {
-    for (const lang of lang_list) {
-      const result = await Db.get_matching_items("%category_ru%", lang, 10);
-      if (result instanceof Db_Error_Response) {
-        expect(result).toBe(1);
-        return;
-      }
-      expect(result.rows).toHaveLength(4);
-    }
-  });
-  test("checking with value tegory_r", async () => {
-    for (const lang of lang_list) {
-      const result = await Db.get_matching_items("%tegory_r%", lang, 10);
-      if (result instanceof Db_Error_Response) {
-        expect(result).toBe(1);
-        return;
-      }
-      expect(result.rows).toHaveLength(4);
-    }
-  });
-  test("checking with value category_am_1", async () => {
-    for (const lang of lang_list) {
-      const result = await Db.get_matching_items("%category_am_1%", lang, 10);
-      if (result instanceof Db_Error_Response) {
-        expect(result).toBe(1);
-        return;
-      }
-      expect(result.rows).toHaveLength(2);
-    }
-  });
-  test("checking with value ctgory_am", async () => {
-    for (const lang of lang_list) {
-      const result = await Db.get_matching_items("%ctgory_am%", lang, 10);
-      if (result instanceof Db_Error_Response) {
-        expect(result).toBe(1);
-        return;
-      }
-      expect(result.rows).toHaveLength(0);
-    }
-  });
-  test("checking with value description_am", async () => {
-    for (const lang of lang_list) {
-      const result = await Db.get_matching_items("%description_am%", lang, 10);
-      if (result instanceof Db_Error_Response) {
-        expect(result).toBe(1);
-        return;
-      }
-      expect(result.rows).toHaveLength(4);
-    }
-  });
-  test("checking with value scription_a", async () => {
-    for (const lang of lang_list) {
-      const result = await Db.get_matching_items("%scription_a%", lang, 10);
-      if (result instanceof Db_Error_Response) {
-        expect(result).toBe(1);
-        return;
-      }
-      expect(result.rows).toHaveLength(4);
-    }
-  });
-  test("checking with value description_am_1", async () => {
-    for (const lang of lang_list) {
-      const result = await Db.get_matching_items("%description_am_1%", lang, 10);
-      if (result instanceof Db_Error_Response) {
-        expect(result).toBe(1);
-        return;
-      }
-      expect(result.rows).toHaveLength(1);
-    }
-  });
-  test("checking with value dscription_r", async () => {
-    for (const lang of lang_list) {
-      const result = await Db.get_matching_items("%dscription_r%", lang, 10);
-      if (result instanceof Db_Error_Response) {
-        expect(result).toBe(1);
-        return;
-      }
-      expect(result.rows).toHaveLength(0);
-    }
   });
 });
 

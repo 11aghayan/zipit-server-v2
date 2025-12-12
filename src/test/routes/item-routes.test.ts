@@ -385,61 +385,6 @@ describe("Public routes tests", () => {
       }
     });
   });
-
-  describe("Search tests", () => {
-    test("searching with valid lang, valid query, limit 2", async () => {
-      for (const lang of lang_list) {
-        const res = await request(app)
-          .get(`${BASE_URL}/items/search?lang=${lang}&query=category_am_1&limit=2`);
-        server.close();
-        expect(res.status).toBe(200);
-        expect(res.body.length).toBe(2);
-        expect(Array.isArray(res.body.items)).toBe(true);
-        expect(res.body.items.length === res.body.length).toBe(true);
-        expect(res.body.items.every((i: { name: string }) => Number(i.name.split("_").at(-1)) % 2 !== 0)).toBe(true);
-      }
-    });
-    test("searching with invalid lang, valid query, limit 2", async () => {
-      const res = await request(app)
-        .get(`${BASE_URL}/items/search?lang=invalid&query=category_am_1&limit=2`);
-      expect(res.status).toBe(400);
-      expect(res.body.message).toBe("lang must be either am or ru, you provided invalid");
-    });
-    test("searching with valid lang, empty query", async () => {
-      for (const lang of lang_list) {
-        const res = await request(app)
-          .get(`${BASE_URL}/items/search?lang=${lang}&query=&limit=2`);
-        server.close();
-        expect(res.status).toBe(200);
-        expect(res.body.length).toBe(0);
-        expect(Array.isArray(res.body.items)).toBe(true);
-        expect(res.body.items.length === res.body.length).toBe(true);
-      }
-    });
-    test("searching with valid lang, only spaces query", async () => {
-      for (const lang of lang_list) {
-        const res = await request(app)
-          .get(`${BASE_URL}/items/search?lang=${lang}&query=  &limit=2`);
-        server.close();
-        expect(res.status).toBe(200);
-        expect(res.body.length).toBe(0);
-        expect(Array.isArray(res.body.items)).toBe(true);
-        expect(res.body.items.length === res.body.length).toBe(true);
-      }
-    });
-    test("searching with valid lang, valid query, invalid limits", async () => {
-      for (const lang of lang_list) {
-        const res = await request(app)
-          .get(`${BASE_URL}/items/search?lang=${lang}&query=category_am_2&limit=invalid`);
-        server.close();
-        expect(res.status).toBe(200);
-        expect(res.body.length).toBe(2);
-        expect(Array.isArray(res.body.items)).toBe(true);
-        expect(res.body.items.length === res.body.length).toBe(true);
-        expect(res.body.items.every((i: { name: string }) => Number(i.name.split("_").at(-1)) % 2 === 0)).toBe(true);
-      }
-    });
-  });
 });
 
 describe("Admin routes tests", () => {
@@ -715,6 +660,7 @@ describe("Admin routes tests", () => {
             min_order_value: 7,
             description_am: "  ",
             description_ru: null,
+            item_code: "item_code_added",
             src: [valid_photo_src],
             special_group: "new",
             available: 1
@@ -1189,6 +1135,27 @@ describe("Admin routes tests", () => {
         expect(res.body.message).toBe(`invalid min_order_unit: ${min_order_unit}`);
       }
     });
+    test("adding item with authorized user, invalid variant item_code types", async () => {
+      for (const item_code of [0, 1, false, true, undefined, {}, () => {}, []]) {
+        const res = await request(app)
+          .post(`${BASE_URL}/items/item/admin`)
+          .set("Cookie", [`jwt_token=${jwt_token}`])
+          .send({
+            ...valid_item,
+            variants: [
+              {
+                // @ts-ignore
+                ...valid_item.variants[0],
+                item_code
+              }
+            ]
+          });
+        server.close();
+        const item_code_json = JSON.parse(JSON.stringify({ key: item_code })).key;
+        expect(res.status).toBe(400);
+        expect(res.body.message).toBe(`typeof item_code is ${typeof item_code_json}`);
+      }
+    });
     test("adding item with authorized user, invalid variant description am types", async () => {
       for (const description_am of [0, 1, false, true, undefined, {}, () => {}, []]) {
         const res = await request(app)
@@ -1367,7 +1334,8 @@ describe("Admin routes tests", () => {
   });
   describe("Edit Item tests", () => {
     let items: T_Item_Admin_Full_Response[];
-    const valid_variant = {
+    let item_code_index = 1;
+    const valid_variant = () => ({
       price: 70,
       promo: 30,
       size_unit: "cm",
@@ -1378,10 +1346,11 @@ describe("Admin routes tests", () => {
       min_order_value: 7,
       description_am: "  ",
       description_ru: null,
+      item_code: `${item_code_index++}_item_code_added`,
       src: [valid_photo_src],
       special_group: "new",
       available: 1
-    };
+    });
     
     beforeEach(async () => {
       const memory: T_Item_Admin_Full_Response[] = [];
@@ -1507,7 +1476,6 @@ describe("Admin routes tests", () => {
               category_id: "invalid_id"
             });
           expect(res.status).toBe(500);
-          expect(res.body.message).toBe("Item editing error");
         }
       });
       test("editing with not_existing category_id", async () => {
@@ -1520,7 +1488,6 @@ describe("Admin routes tests", () => {
               category_id: not_existing_id
             });
           expect(res.status).toBe(500);
-          expect(res.body.message).toBe("Item editing error");
         }
       });
       test("editing with unauthorized user, valid data", async () => {
@@ -1557,7 +1524,7 @@ describe("Admin routes tests", () => {
               ...item,
               variants: [
                 ...item.variants,
-                valid_variant
+                valid_variant()
               ]
             });
           server.close();
@@ -1576,7 +1543,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     price
                   }
                 ]
@@ -1599,7 +1566,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     price
                   }
                 ]
@@ -1621,7 +1588,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     promo
                   }
                 ]
@@ -1643,7 +1610,7 @@ describe("Admin routes tests", () => {
               variants: [
                 ...item.variants,
                 {
-                  ...valid_variant,
+                  ...valid_variant(),
                   promo: -1
                 }
               ]
@@ -1664,7 +1631,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     size_value
                   }
                 ]
@@ -1686,7 +1653,7 @@ describe("Admin routes tests", () => {
               variants: [
                 ...item.variants,
                 {
-                  ...valid_variant,
+                  ...valid_variant(),
                   size_value: -1
                 }
               ]
@@ -1707,7 +1674,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     size_unit
                   }
                 ]
@@ -1730,7 +1697,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     size_unit
                   }
                 ]
@@ -1753,7 +1720,7 @@ describe("Admin routes tests", () => {
                   variants: [
                     ...item.variants,
                     {
-                      ...valid_variant,
+                      ...valid_variant(),
                       [color]: value
                     }
                   ]
@@ -1778,7 +1745,7 @@ describe("Admin routes tests", () => {
                   variants: [
                     ...item.variants,
                     {
-                      ...valid_variant,
+                      ...valid_variant(),
                       [color]: value
                     }
                   ]
@@ -1802,7 +1769,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     min_order_value
                   }
                 ]
@@ -1825,7 +1792,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     min_order_value
                   }
                 ]
@@ -1847,7 +1814,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     min_order_unit
                   }
                 ]
@@ -1870,7 +1837,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     min_order_unit
                   }
                 ]
@@ -1893,7 +1860,7 @@ describe("Admin routes tests", () => {
                   variants: [
                     ...item.variants,
                     {
-                      ...valid_variant,
+                      ...valid_variant(),
                       [description]: value
                     }
                   ]
@@ -1904,6 +1871,29 @@ describe("Admin routes tests", () => {
               expect(res.body.message).toBe(`typeof ${description} is ${typeof value_json}`);
             }
           }
+        }
+      });
+      test("adding variant with authorized user, invalid variant item_code types", async () => {
+        for (const item of items) {
+            for (const value of [-1, 0, 1, null, false, true, undefined, {}, [], () => {}]) {
+                const res = await request(app)
+                .put(`${BASE_URL}/items/item/admin/${item.id}`)
+                .set("Cookie", [`jwt_token=${jwt_token}`])
+                .send({
+                    ...item,
+                    variants: [
+                    ...item.variants,
+                    {
+                        ...valid_variant(),
+                        item_code: value
+                    }
+                    ]
+                });
+                server.close();
+                const value_json = JSON.parse(JSON.stringify({ key: value })).key;
+                expect(res.status).toBe(400);
+                expect(res.body.message).toBe(`typeof item_code is ${typeof value_json}`);
+            }
         }
       });
       test("adding variant with authorized user, invalid variant photo src types", async () => {
@@ -1917,7 +1907,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     src
                   }
                 ]
@@ -1939,7 +1929,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     src: [photo_src]
                   }
                 ]
@@ -1962,7 +1952,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     src: [photo_src]
                   }
                 ]
@@ -1984,7 +1974,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     special_group
                   }
                 ]
@@ -2006,7 +1996,7 @@ describe("Admin routes tests", () => {
                 variants: [
                   ...item.variants,
                   {
-                    ...valid_variant,
+                    ...valid_variant(),
                     available
                   }
                 ]
@@ -2028,7 +2018,7 @@ describe("Admin routes tests", () => {
               variants: [
                 ...item.variants,
                 {
-                  ...valid_variant,
+                  ...valid_variant(),
                   available: -1
                 }
               ]
@@ -2044,7 +2034,7 @@ describe("Admin routes tests", () => {
             .put(`${BASE_URL}/items/item/admin/${item.id}`)
             .send({
               ...item,
-              valid_variant
+              ...valid_variant()
             });
           server.close();
           expect(res.status).toBe(401);
@@ -2057,7 +2047,7 @@ describe("Admin routes tests", () => {
             .set("Cookie", ["jwt_token=invalid_token"])
             .send({
               ...item,
-              valid_variant
+              ...valid_variant()
             });
           server.close();
           expect(res.status).toBe(403);
@@ -2080,6 +2070,7 @@ describe("Admin routes tests", () => {
                   color_ru: "color_ru_edited",
                   description_am: "description_am_edited",
                   description_ru: "description_ru_edited",
+                  item_code: `${item.id.slice(0, 10)}_item_code_edited`,
                   min_order_unit: "roll",
                   min_order_value: 3,
                   price: 300,
@@ -2100,6 +2091,7 @@ describe("Admin routes tests", () => {
           expect(variant.color_ru).toBe("color_ru_edited");
           expect(variant.description_am).toBe("description_am_edited");
           expect(variant.description_ru).toBe("description_ru_edited");
+          expect(variant.item_code).toBe(`${variant.item_id.slice(0, 10)}_item_code_edited`);
           expect(variant.min_order_unit).toBe("roll");
           expect(variant.min_order_value).toBe(3);
           expect(variant.size_unit).toBe("cm");
@@ -2609,7 +2601,7 @@ describe("Admin routes tests", () => {
               ...item,
               variants: [
                 ...item.variants,
-                valid_variant
+                valid_variant()
               ]
             });
           server.close();
@@ -2703,7 +2695,6 @@ describe("Admin routes tests", () => {
             });
           server.close();
           expect(res.status).toBe(500);
-          expect(res.body.message).toBe("Item editing error");
         }
       });
       test("deleting variant with authorized user, wrong types size_id", async () => {
@@ -2771,7 +2762,6 @@ describe("Admin routes tests", () => {
             });
           server.close();
           expect(res.status).toBe(500);
-          expect(res.body.message).toBe("Item editing error");
         }
       });
       test("deleting variant with authorized user, wrong types color_id", async () => {
@@ -2839,7 +2829,6 @@ describe("Admin routes tests", () => {
             });
           server.close();
           expect(res.status).toBe(500);
-          expect(res.body.message).toBe("Item editing error");
         }
       });
       test("deleting variant with unauthorized user, valid data", async () => {
@@ -2898,7 +2887,6 @@ describe("Admin routes tests", () => {
         .delete(`${BASE_URL}/items/item/admin/invalid_id`)
         .set("Cookie", [`jwt_token=${jwt_token}`]);
       expect(res.status).toBe(500);
-      expect(res.body.message).toBe("Item deleting error");
     });
     test("deleting item with authorized user, not_existing id", async () => {
       const res = await request(app)

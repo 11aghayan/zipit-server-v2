@@ -84,6 +84,7 @@ CREATE TABLE item_info_tbl (
   min_order_unit MIN_ORDER_UNIT NOT NULL,
   description_am TEXT,
   description_ru TEXT,
+  item_code VARCHAR(50) UNIQUE,
   special_group SPECIAL_GROUP,
   available NUMERIC DEFAULT 1 NOT NULL,
   creation_date BIGINT DEFAULT trunc(extract(epoch from now() )*1000) NOT NULL,
